@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Вход</h1>
+
+<form id="loginForm" novalidate>
+    <label>Логин</label>
+    <input 
+        type="text" 
+        id="login" 
+        required 
+        minlength="3"
+        pattern="[a-zA-Z0-9_]+"
+        placeholder="Только буквы и цифры"
+    >
+
+    <label>Пароль</label>
+    <input 
+        type="password" 
+        id="password" 
+        required 
+        minlength="6"
+        placeholder="Минимум 6 символов"
+    >
+
+    <button type="submit">Войти</button>
+</form>
+
+<p>
+    Нет аккаунта?
+    <button type="button" onclick="goRegister()">Создать аккаунт</button>
+</p>
+
+<script src="api.js"></script>
+<script src="auth.js"></script>
+</body>
+</html>

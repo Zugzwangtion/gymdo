@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Дневник тренировок</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="index.html" class="logo">GymDo</a>
+            <a href="guide.html" class="nav-link" id="guideLink">Справочник</a>
+        </div>
+
+        <div class="nav-right">
+            <a href="login.html" id="loginBtn" class="nav-auth-btn">Вход</a>
+            <div id="userBadge" class="user-badge"></div>
+        </div>
+    </nav>
+
+    <div id="workoutModal" style="
+        display:none;
+        position:fixed;
+        top:0; left:0;
+        width:100%; height:100%;
+        background:rgba(0,0,0,0.7);
+        justify-content:center;
+        align-items:center;
+        z-index:1000;
+    ">
+        <div style="
+            background:#1e1e1e;
+            padding:20px;
+            border-radius:10px;
+            max-width:500px;
+            width:90%;
+            max-height:80%;
+            overflow-y:auto;
+            position:relative;
+        ">
+            <button id="closeModal" style="
+                position:absolute;
+                top:10px;
+                right:10px;
+            ">✖</button>
+
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <h1>Дневник тренировок</h1>
+
+    <p id="pageSubtitle" class="page-subtitle">
+        Планируй тренировки, следи за прогрессом и возвращайся к лучшей версии себя.
+    </p>
+
+    <div class="calendar">
+        <div class="calendar-header">
+            <button id="prevMonth">←</button>
+            <h2 id="monthTitle"></h2>
+            <button id="nextMonth">→</button>
+        </div>
+
+        <div class="calendar-weekdays">
+            <div>Пн</div>
+            <div>Вт</div>
+            <div>Ср</div>
+            <div>Чт</div>
+            <div>Пт</div>
+            <div>Сб</div>
+            <div>Вс</div>
+        </div>
+
+        <div id="calendarGrid" class="calendar-grid"></div>
+    </div>
+
+    <div class="stats">
+        <p>Тренировок: <span id="totalWorkouts">0</span></p>
+        <p>Упражнений: <span id="totalExercises">0</span></p>
+        <p>Подходов: <span id="totalSets">0</span></p>
+        <p>Повторений: <span id="totalReps">0</span></p>
+        <p>Общий тоннаж: <span id="totalTonnage">0</span></p>
+    </div>
+
+    <div class="chart-card">
+        <h2 class="section-title">Прогресс</h2>
+        <div class="chart-wrap">
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+
+    <div class="arnold-video-container">
+        <div class="video-wrapper">
+            <iframe
+                width="720"
+                height="405"
+                src="https://rutube.ru/play/embed/d23e77a757993299f842be8a7a1153fc/"
+                style="border: none;"
+                allow="clipboard-write; autoplay"
+                webkitAllowFullScreen
+                mozallowfullscreen
+                allowFullScreen>
+            </iframe>
+        </div>
+        <p class="video-caption">"Nobody ever got muscles by watching me lift weights." - Арнольд Шварценеггер</p>
+    </div>
+
+    <button class="add-btn" onclick="goToAddPage()">+</button>
+
+    <button id="supportBtn" class="support-button">
+        📨 Поддержка
+    </button>
+
+    <div id="supportModal" class="support-modal">
+        <div class="support-content">
+            <h2>Служба поддержки</h2>
+
+            <label>Тип обращения</label>
+            <select id="supportType">
+                <option value="Баг">Сообщить о баге</option>
+                <option value="Предложение">Предложить функцию</option>
+                <option value="Вопрос">Задать вопрос</option>
+            </select>
+
+            <label>Сообщение</label>
+            <textarea
+                id="supportMessage"
+                rows="5"
+                placeholder="Опишите проблему или предложение"></textarea>
+
+            <div class="support-buttons">
+                <button id="sendSupport">Отправить</button>
+                <button id="closeSupport">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="authPromptModal" class="support-modal">
+        <div class="support-content auth-dialog">
+            <h2>Нужна авторизация</h2>
+            <p id="authPromptText" class="auth-dialog-text">
+                Чтобы пользоваться этой функцией, войдите в аккаунт.
+            </p>
+            <div class="auth-dialog-actions">
+                <a href="login.html" class="primary-link-btn">Войти</a>
+                <a href="register.html" class="secondary-link-btn">Создать аккаунт</a>
+                <button id="closeAuthPrompt" type="button">Позже</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

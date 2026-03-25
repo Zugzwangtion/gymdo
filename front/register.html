@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Регистрация</h1>
+
+<form id="registerForm" novalidate>
+    <label>Логин</label>
+    <input 
+        type="text" 
+        id="login" 
+        required 
+        minlength="3"
+        pattern="[a-zA-Z0-9_]+"
+        placeholder="Только буквы и цифры"
+    >
+
+    <label>Email</label>
+    <input 
+        type="email" 
+        id="email" 
+        required 
+        placeholder="example@mail.com"
+    >
+
+    <label>Пароль</label>
+    <input 
+        type="password" 
+        id="password" 
+        required 
+        minlength="6"
+        placeholder="Минимум 6 символов"
+    >
+
+    <button type="submit">Создать аккаунт</button>
+</form>
+
+<script src="api.js"></script>
+<script src="auth.js"></script>
+</body>
+</html>
