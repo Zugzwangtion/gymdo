@@ -1,11 +1,15 @@
 const API_BASE = "http://127.0.0.1:8000";
+const JSON_CONTENT_TYPE = "application/json";
+const CSRF_SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
 
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
+
     if (parts.length === 2) {
         return parts.pop().split(";").shift();
     }
+
     return null;
 }
 
@@ -16,51 +20,73 @@ async function ensureCsrfCookie() {
     });
 }
 
-async function apiFetch(path, options = {}) {
-    const method = (options.method || "GET").toUpperCase();
-    const headers = {
-        ...(options.headers || {})
-    };
+function isJsonBody(body) {
+    return body != null && !(body instanceof FormData);
+}
 
-    if (!(options.body instanceof FormData) && !headers["Content-Type"]) {
-        headers["Content-Type"] = "application/json";
+function buildHeaders(options) {
+    const headers = { ...(options.headers || {}) };
+
+    if (isJsonBody(options.body) && !headers["Content-Type"]) {
+        headers["Content-Type"] = JSON_CONTENT_TYPE;
     }
 
-    if (["POST", "PUT", "PATCH", "DELETE"].includes(method)) {
-        await ensureCsrfCookie();
-        const csrfToken = getCookie("csrftoken");
-        if (csrfToken) {
-            headers["X-CSRFToken"] = csrfToken;
-        }
+    return headers;
+}
+
+async function attachCsrfHeader(method, headers) {
+    if (CSRF_SAFE_METHODS.includes(method)) {
+        return headers;
     }
 
-    const response = await fetch(`${API_BASE}${path}`, {
-        credentials: "include",
-        ...options,
-        headers
-    });
+    await ensureCsrfCookie();
 
+    const csrfToken = getCookie("csrftoken");
+    if (csrfToken) {
+        headers["X-CSRFToken"] = csrfToken;
+    }
+
+    return headers;
+}
+
+async function parseResponse(response) {
     if (response.status === 204) {
         return null;
     }
 
     const contentType = response.headers.get("content-type") || "";
-    let data = null;
 
-    if (contentType.includes("application/json")) {
-        data = await response.json();
-    } else {
-        data = await response.text();
+    if (contentType.includes(JSON_CONTENT_TYPE)) {
+        return response.json();
     }
 
-    if (!response.ok) {
-        const message =
-            data?.detail ||
-            data?.error ||
-            data?.message ||
-            (typeof data === "string" ? data : "Ошибка запроса");
+    return response.text();
+}
 
-        throw new Error(message);
+function getErrorMessage(data) {
+    return (
+        data?.detail ||
+        data?.error ||
+        data?.message ||
+        (typeof data === "string" ? data : "Ошибка запроса")
+    );
+}
+
+async function apiFetch(path, options = {}) {
+    const method = (options.method || "GET").toUpperCase();
+    const headers = await attachCsrfHeader(method, buildHeaders(options));
+
+    const response = await fetch(`${API_BASE}${path}`, {
+        credentials: "include",
+        ...options,
+        method,
+        headers
+    });
+
+    const data = await parseResponse(response);
+
+    if (!response.ok) {
+        throw new Error(getErrorMessage(data));
     }
 
     return data;
@@ -68,12 +94,7 @@ async function apiFetch(path, options = {}) {
 
 async function getCurrentUser() {
     const data = await apiFetch("/api/auth/me/");
-
-    if (data?.is_authenticated === true && data?.user) {
-        return data.user;
-    }
-
-    return null;
+    return data?.is_authenticated && data?.user ? data.user : null;
 }
 
 async function loginUser(username, password) {
@@ -83,17 +104,15 @@ async function loginUser(username, password) {
     });
 }
 
-async function registerUser(username, password) {
+async function registerUser(username, password, email = "") {
     return apiFetch("/api/auth/register/", {
         method: "POST",
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password, email })
     });
 }
 
 async function logoutUser() {
-    return apiFetch("/api/auth/logout/", {
-        method: "POST"
-    });
+    return apiFetch("/api/auth/logout/", { method: "POST" });
 }
 
 async function getWorkouts() {

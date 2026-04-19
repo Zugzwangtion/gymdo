@@ -1,47 +1,197 @@
-let currentUser = null;
-let isAuthenticated = false;
-let workouts = [];
+const state = {
+    currentUser: null,
+    isAuthenticated: false,
+    workouts: [],
+    currentDate: new Date(),
+    chartInstance: null
+};
 
-let currentDate = new Date();
-let chartInstance = null;
+const elements = {
+    modal: document.getElementById("workoutModal"),
+    modalContent: document.getElementById("modalContent"),
+    closeModalButton: document.getElementById("closeModal"),
+    userBadge: document.getElementById("userBadge"),
+    userDropdown: document.getElementById("userDropdown"),
+    profileLogoutBtn: document.getElementById("profileLogoutBtn"),
+    loginBtn: document.getElementById("loginBtn"),
+    guideLink: document.getElementById("guideLink"),
+    pageSubtitle: document.getElementById("pageSubtitle"),
+    authPromptModal: document.getElementById("authPromptModal"),
+    authPromptText: document.getElementById("authPromptText"),
+    closeAuthPrompt: document.getElementById("closeAuthPrompt"),
+    calendarGrid: document.getElementById("calendarGrid"),
+    monthTitle: document.getElementById("monthTitle"),
+    chartCanvas: document.getElementById("chart"),
+    totalWorkouts: document.getElementById("totalWorkouts"),
+    totalExercises: document.getElementById("totalExercises"),
+    totalSets: document.getElementById("totalSets"),
+    totalReps: document.getElementById("totalReps"),
+    totalTonnage: document.getElementById("totalTonnage"),
+    prevMonth: document.getElementById("prevMonth"),
+    nextMonth: document.getElementById("nextMonth"),
+    frontMapContainer: document.getElementById("frontMapContainer"),
+    backMapContainer: document.getElementById("backMapContainer"),
+    muscleLegend: document.getElementById("muscleLegend"),
+};
 
-// Элементы интерфейса
-const modal = document.getElementById("workoutModal");
-const closeBtn = document.getElementById("closeModal");
+const exerciseMuscleMap = {
+    "Жим штанги лежа": ["chest", "front-shoulders", "triceps"],
+    "Жим гантелей лежа": ["chest", "front-shoulders", "triceps"],
+    "Жим штанги лежа на наклонной скамье": ["upper-chest", "front-shoulders", "triceps"],
+    "Жим гантелей лежа на наклонной скамье": ["upper-chest", "front-shoulders", "triceps"],
 
-const userBadge = document.getElementById("userBadge");
-const loginBtn = document.getElementById("loginBtn");
-const guideLink = document.getElementById("guideLink");
-const pageSubtitle = document.getElementById("pageSubtitle");
+    "Тяга хамера": ["lats", "mid-back", "rear-shoulders", "biceps"],
+    "Подтягивания": ["lats", "biceps", "forearms"],
+    "Тяга верхнего блока": ["lats", "biceps", "forearms"],
+    "Тяга нижнего блока": ["mid-back", "lats", "biceps"],
 
-const authPromptModal = document.getElementById("authPromptModal");
-const authPromptText = document.getElementById("authPromptText");
-const closeAuthPrompt = document.getElementById("closeAuthPrompt");
+    "Жим гантелей сидя": ["front-shoulders", "side-shoulders", "triceps"],
+    "Армейский жим": ["front-shoulders", "side-shoulders", "triceps"],
+    "Махи гантелями": ["side-shoulders"],
 
-const supportBtn = document.getElementById("supportBtn");
-const supportModal = document.getElementById("supportModal");
-const closeSupport = document.getElementById("closeSupport");
-const sendSupport = document.getElementById("sendSupport");
+    "Подъем штанги на бицепс": ["biceps", "forearms"],
+    "Подъем гантелей на бицепс": ["biceps", "forearms"],
+    "Французский жим": ["triceps"],
+    "Разгибание рук в кроссовере": ["triceps"],
 
-// ===== АВТОРИЗАЦИЯ =====
-function requireAuth(message = "Чтобы пользоваться этой функцией, войдите в аккаунт.") {
-    if (authPromptText && authPromptModal) {
-        authPromptText.textContent = message;
-        authPromptModal.style.display = "flex";
-    } else {
-        alert(message);
+    "Жим ногами": ["quads", "glutes", "hamstrings"],
+    "Разгибание ног в тренажере": ["quads"],
+    "Сгибание ног в тренажере": ["hamstrings"],
+    "Подъем на носки с утяжелением": ["calves"],
+
+    "Скручивания в тренажере": ["abs"],
+    "Скручивания на скамье": ["abs"]
+};
+
+const muscleSvgMap = {
+    chest: {
+        front: ["chest-left", "chest-right"],
+        label: "Грудь"
+    },
+
+    abs: {
+        front: ["abs-upper", "abs-lower"],
+        label: "Пресс"
+    },
+
+    obliques: {
+        front: ["oblique-left", "oblique-right"],
+        label: "Косые мышцы живота"
+    },
+
+    biceps: {
+        front: ["bicep-left", "bicep-right "], // у правого id с пробелом в конце
+        label: "Бицепс"
+    },
+
+    triceps: {
+        back: ["triceps-left", "triceps-right"],
+        label: "Трицепс"
+    },
+
+    forearms: {
+        front: ["forearm-left", "forearm-right"],
+        back: ["forearms-back-left", "forearms-back-right"],
+        label: "Предплечья"
+    },
+
+    shoulders: {
+        front: ["shoulder-left ", "shoulder-right"], // у левого id с пробелом в конце
+        back: ["shoulder-left", "shoulder-right", "shoulder"],
+        label: "Плечи"
+    },
+
+
+    traps: {
+        front: ["trap-front-left", "trap-front-right"],
+        back: ["traps"],
+        label: "Трапеции"
+    },
+
+    lats: {
+        back: ["lat-left", "lat-right"],
+        label: "Широчайшие"
+    },
+
+
+    upperBack: {
+        back: ["up-medium-back"],
+        label: "Верх спины"
+    },
+
+    lowerBack: {
+        back: ["down-medium-back"],
+        label: "Низ спины"
+    },
+
+    glutes: {
+        back: ["glutes-left", "glutes-right"],
+        label: "Ягодицы"
+    },
+
+    quads: {
+        front: ["quad-left ", "quad-right"], // у левого id с пробелом в конце
+        label: "Квадрицепсы"
+    },
+
+    hamstrings: {
+        back: ["hamstring-left", "hamstring-right"],
+        label: "Бицепс бедра"
+    },
+
+    calves: {
+        front: ["calf-front-left", "calf-front-right"],
+        back: ["calf-left", "calf-right"],
+        label: "Икры"
+    },
+
+    adductors: {
+        front: ["adductor-left", "adductor-right"],
+        back: ["adduktor-left", "adduktor-right"],
+        label: "Приводящие мышцы"
+    },
+
+    neck: {
+        front: ["neck-front"],
+        back: ["neck-back"],
+        label: "Шея"
     }
+};
+
+function formatDate(year, month, day) {
+    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function requireAuth(message = "Чтобы пользоваться этой функцией, войдите в аккаунт.") {
+    if (!elements.authPromptModal || !elements.authPromptText) {
+        alert(message);
+        return;
+    }
+
+    elements.authPromptText.textContent = message;
+    elements.authPromptModal.style.display = "flex";
 }
 
 function closeAuthModal() {
-    if (authPromptModal) {
-        authPromptModal.style.display = "none";
+    if (elements.authPromptModal) {
+        elements.authPromptModal.style.display = "none";
     }
 }
 
-// ===== ПЕРЕХОД НА СТРАНИЦУ ДОБАВЛЕНИЯ =====
+function closeModal() {
+    if (elements.modal) {
+        elements.modal.style.display = "none";
+    }
+}
+
+function openModal() {
+    if (elements.modal) {
+        elements.modal.style.display = "flex";
+    }
+}
+
 function goToAddPage(date = "") {
-    if (!isAuthenticated) {
+    if (!state.isAuthenticated) {
         requireAuth("Чтобы добавить тренировку, войдите в аккаунт.");
         return;
     }
@@ -49,130 +199,227 @@ function goToAddPage(date = "") {
     location.href = date ? `add.html?date=${date}` : "add.html";
 }
 
-// ===== УДАЛЕНИЕ ТРЕНИРОВКИ =====
-async function deleteWorkout(id, dateStr) {
-    if (!isAuthenticated) return;
-
-    if (!confirm("Удалить тренировку за " + dateStr + "?")) return;
-
-    try {
-        await deleteWorkoutById(id);
-        workouts = workouts.filter(w => w.id !== id);
-
-        updateStats();
-        renderCalendar();
-        renderChart();
-        closeModal();
-    } catch (error) {
-        alert(error.message || "Ошибка удаления тренировки");
-    }
+function getDayWorkouts(dateString) {
+    return state.workouts.filter((workout) => workout.date === dateString);
 }
 
-// ===== КАЛЕНДАРЬ =====
-function renderCalendar() {
-    const grid = document.getElementById("calendarGrid");
-    const title = document.getElementById("monthTitle");
+function createWorkoutIndicator() {
+    const dot = document.createElement("span");
+    dot.className = "day-indicator-dot";
+    return dot;
+}
 
-    if (!grid || !title) return;
+function createCalendarDay(day, dateString, dayWorkouts) {
+    const dayCell = document.createElement("div");
+    dayCell.className = `day${dayWorkouts.length ? " workout" : ""}`;
+    dayCell.textContent = String(day);
 
-    grid.innerHTML = "";
+    if (dayWorkouts.length > 0) {
+        const indicators = document.createElement("div");
+        indicators.className = "day-indicators";
+        dayWorkouts.forEach(() => indicators.appendChild(createWorkoutIndicator()));
+        dayCell.appendChild(indicators);
+    }
 
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
+    dayCell.addEventListener("click", () => {
+        if (!state.isAuthenticated) {
+            requireAuth("Чтобы открыть календарь тренировок и добавлять занятия, войдите в аккаунт.");
+            return;
+        }
 
-    title.textContent = currentDate.toLocaleString("ru", {
-        month: "long",
-        year: "numeric"
+        if (dayWorkouts.length > 0) {
+            showDayWorkouts(dateString, dayWorkouts);
+            return;
+        }
+
+        goToAddPage(dateString);
     });
 
+    return dayCell;
+}
+
+function renderCalendar() {
+    const { calendarGrid, monthTitle } = elements;
+    if (!calendarGrid || !monthTitle) {
+        return;
+    }
+
+    calendarGrid.innerHTML = "";
+
+    const year = state.currentDate.getFullYear();
+    const month = state.currentDate.getMonth();
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const offset = firstDay === 0 ? 6 : firstDay - 1;
 
-    for (let i = 0; i < offset; i++) {
-        grid.appendChild(document.createElement("div"));
+    monthTitle.textContent = state.currentDate.toLocaleString("ru", {
+        month: "long",
+        year: "numeric"
+    });
+
+    for (let i = 0; i < offset; i += 1) {
+        calendarGrid.appendChild(document.createElement("div"));
     }
 
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = formatDate(year, month + 1, day);
-        const workout = workouts.find(w => w.date === dateStr);
-
-        const div = document.createElement("div");
-        div.className = "day" + (workout ? " workout" : "");
-        div.textContent = day;
-
-        div.onclick = () => {
-            if (!isAuthenticated) {
-                requireAuth("Чтобы открыть календарь тренировок и добавлять занятия, войдите в аккаунт.");
-                return;
-            }
-
-            if (workout) {
-                showWorkoutDetails(workout);
-            } else {
-                goToAddPage(dateStr);
-            }
-        };
-
-        grid.appendChild(div);
+    for (let day = 1; day <= daysInMonth; day += 1) {
+        const dateString = formatDate(year, month + 1, day);
+        const dayWorkouts = getDayWorkouts(dateString);
+        calendarGrid.appendChild(createCalendarDay(day, dateString, dayWorkouts));
     }
 }
 
-// ===== СТАТИСТИКА =====
-function updateStats() {
-    let totalExercises = 0;
-    let totalSets = 0;
-    let totalReps = 0;
-    let totalTonnage = 0;
+function createInfoParagraph(text) {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = text;
+    return paragraph;
+}
 
-    workouts.forEach(w => {
-        totalTonnage += Number(w.tonnage || 0);
+function showWorkoutDetails(workout) {
+    if (!elements.modalContent) {
+        return;
+    }
 
-        (w.exercises || []).forEach(ex => {
-            totalExercises++;
-            totalSets += (ex.sets || []).length;
+    elements.modalContent.innerHTML = "";
 
-            (ex.sets || []).forEach(s => {
-                totalReps += Number(s.reps || 0);
-            });
+    const title = document.createElement("h2");
+    title.textContent = workout.date || "Без даты";
+
+    elements.modalContent.append(
+        title,
+        createInfoParagraph(`Длительность: ${workout.duration ?? 0} мин`),
+        createInfoParagraph(`Тоннаж: ${workout.tonnage ?? 0}`)
+    );
+
+    (workout.exercises || []).forEach((exercise) => {
+        const exerciseTitle = document.createElement("h3");
+        exerciseTitle.textContent = exercise.name || "Без названия";
+        elements.modalContent.appendChild(exerciseTitle);
+
+        (exercise.sets || []).forEach((set, index) => {
+            const setDiv = document.createElement("div");
+            setDiv.className = "workout-set";
+            setDiv.textContent = `Подход ${index + 1}: ${set.weight ?? 0} кг × ${set.reps ?? 0}`;
+            elements.modalContent.appendChild(setDiv);
         });
     });
 
-    document.getElementById("totalWorkouts").textContent = workouts.length;
-    document.getElementById("totalExercises").textContent = totalExercises;
-    document.getElementById("totalSets").textContent = totalSets;
-    document.getElementById("totalReps").textContent = totalReps;
-    document.getElementById("totalTonnage").textContent = totalTonnage;
+    const spacer = document.createElement("br");
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Удалить тренировку";
+    deleteButton.addEventListener("click", () => deleteWorkout(workout.id, workout.date));
+
+    elements.modalContent.append(spacer, deleteButton);
+    openModal();
 }
 
-// ===== ГРАФИК =====
-function renderChart() {
-    const ctx = document.getElementById("chart");
-    if (!ctx || typeof Chart === "undefined") return;
-
-    if (chartInstance) {
-        chartInstance.destroy();
+function showDayWorkouts(dateString, dayWorkouts) {
+    if (!elements.modalContent) {
+        return;
     }
 
-    const sorted = [...workouts].sort(
+    elements.modalContent.innerHTML = "";
+
+    const title = document.createElement("h2");
+    title.textContent = `${dateString} — тренировок: ${dayWorkouts.length}`;
+    elements.modalContent.appendChild(title);
+
+    dayWorkouts.forEach((workout, index) => {
+        const card = document.createElement("div");
+        card.className = "day-workout-card";
+
+        const openButton = document.createElement("button");
+        openButton.type = "button";
+        openButton.textContent = "Открыть";
+        openButton.addEventListener("click", () => showWorkoutDetails(workout));
+
+        card.append(
+            Object.assign(document.createElement("h3"), {
+                textContent: `Тренировка ${index + 1}`
+            }),
+            createInfoParagraph(`Длительность: ${workout.duration ?? 0} мин`),
+            createInfoParagraph(`Тоннаж: ${workout.tonnage ?? 0}`),
+            openButton
+        );
+
+        elements.modalContent.appendChild(card);
+    });
+
+    const addButton = document.createElement("button");
+    addButton.type = "button";
+    addButton.textContent = "+ Добавить ещё тренировку";
+    addButton.style.marginTop = "16px";
+    addButton.addEventListener("click", () => goToAddPage(dateString));
+
+    elements.modalContent.appendChild(addButton);
+    openModal();
+}
+
+function getStats() {
+    return state.workouts.reduce(
+        (stats, workout) => {
+            stats.totalWorkouts += 1;
+            stats.totalTonnage += Number(workout.tonnage || 0);
+
+            (workout.exercises || []).forEach((exercise) => {
+                stats.totalExercises += 1;
+                stats.totalSets += (exercise.sets || []).length;
+
+                (exercise.sets || []).forEach((set) => {
+                    stats.totalReps += Number(set.reps || 0);
+                });
+            });
+
+            return stats;
+        },
+        {
+            totalWorkouts: 0,
+            totalExercises: 0,
+            totalSets: 0,
+            totalReps: 0,
+            totalTonnage: 0
+        }
+    );
+}
+
+function updateStats() {
+    const stats = getStats();
+
+    if (elements.totalWorkouts) elements.totalWorkouts.textContent = String(stats.totalWorkouts);
+    if (elements.totalExercises) elements.totalExercises.textContent = String(stats.totalExercises);
+    if (elements.totalSets) elements.totalSets.textContent = String(stats.totalSets);
+    if (elements.totalReps) elements.totalReps.textContent = String(stats.totalReps);
+    if (elements.totalTonnage) elements.totalTonnage.textContent = String(stats.totalTonnage);
+}
+
+function renderChart() {
+    if (!elements.chartCanvas || typeof Chart === "undefined") {
+        return;
+    }
+
+    if (state.chartInstance) {
+        state.chartInstance.destroy();
+    }
+
+    const sortedWorkouts = [...state.workouts].sort(
         (a, b) => new Date(a.date) - new Date(b.date)
     );
 
-    chartInstance = new Chart(ctx, {
+    state.chartInstance = new Chart(elements.chartCanvas, {
         type: "line",
         data: {
-            labels: sorted.map(w => w.date),
+            labels: sortedWorkouts.map((workout) => workout.date),
             datasets: [
                 {
                     label: "Тоннаж",
-                    data: sorted.map(w => Number(w.tonnage || 0)),
+                    data: sortedWorkouts.map((workout) => Number(workout.tonnage || 0)),
                     borderColor: "#4caf50",
                     tension: 0.3,
                     yAxisID: "yTonnage"
                 },
                 {
                     label: "Длительность (мин)",
-                    data: sorted.map(w => Number(w.duration || 0)),
+                    data: sortedWorkouts.map((workout) => Number(workout.duration || 0)),
                     borderColor: "#ffeb3b",
                     tension: 0.3,
                     yAxisID: "yDuration"
@@ -231,212 +478,310 @@ function renderChart() {
     });
 }
 
-// ===== МОДАЛКА ТРЕНИРОВКИ =====
-function showWorkoutDetails(workout) {
-    const content = document.getElementById("modalContent");
-    if (!content || !modal) return;
+async function deleteWorkout(id, dateString) {
+    if (!state.isAuthenticated) {
+        return;
+    }
 
-    let html = `
-        <h2>${workout.date}</h2>
-        <p>Длительность: ${workout.duration} мин</p>
-        <p>Тоннаж: ${workout.tonnage}</p>
-    `;
+    if (!confirm(`Удалить тренировку за ${dateString}?`)) {
+        return;
+    }
 
-    (workout.exercises || []).forEach(ex => {
-        html += `<h3>${ex.name}</h3>`;
-
-        (ex.sets || []).forEach((set, i) => {
-            html += `
-                <div class="workout-set">
-                    Подход ${i + 1}: ${set.weight} кг × ${set.reps}
-                </div>
-            `;
-        });
-    });
-
-    html += `
-        <br>
-        <button onclick="deleteWorkout(${workout.id}, '${workout.date}')">
-            Удалить тренировку
-        </button>
-    `;
-
-    content.innerHTML = html;
-    modal.style.display = "flex";
-}
-
-function closeModal() {
-    if (modal) {
-        modal.style.display = "none";
+    try {
+        await deleteWorkoutById(id);
+        state.workouts = state.workouts.filter((workout) => workout.id !== id);
+        updateStats();
+        renderCalendar();
+        renderChart();
+        await loadMuscleMaps();
+        closeModal();
+    } catch (error) {
+        alert(error.message || "Ошибка удаления тренировки");
     }
 }
 
-if (closeBtn) {
-    closeBtn.onclick = closeModal;
+function updateAuthenticatedHeader() {
+    if (elements.loginBtn) {
+        elements.loginBtn.style.display = state.isAuthenticated ? "none" : "inline-flex";
+    }
+
+    if (elements.userBadge) {
+        elements.userBadge.style.display = state.isAuthenticated ? "flex" : "none";
+
+        if (state.isAuthenticated && state.currentUser) {
+            elements.userBadge.textContent = state.currentUser.username[0].toUpperCase();
+        }
+    }
+
+    if (elements.pageSubtitle) {
+        elements.pageSubtitle.textContent = state.isAuthenticated
+            ? "Следи за прогрессом, добавляй тренировки в календарь и анализируй свои результаты."
+            : "Это главная страница GymDo. Чтобы сохранять тренировки, открывать справочник и пользоваться функциями приложения, войдите в аккаунт.";
+    }
 }
 
-if (closeAuthPrompt) {
-    closeAuthPrompt.onclick = closeAuthModal;
-}
+function bindEvents() {
+    elements.closeModalButton?.addEventListener("click", closeModal);
+    elements.closeAuthPrompt?.addEventListener("click", closeAuthModal);
 
-// ===== КНОПКА СПРАВОЧНИКА ДЛЯ ГОСТЯ =====
-if (guideLink) {
-    guideLink.onclick = (event) => {
-        if (!isAuthenticated) {
+    elements.profileLogoutBtn?.addEventListener("click", async () => {
+        const confirmed = confirm("Выйти из аккаунта?");
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await logoutUser();
+            state.currentUser = null;
+            state.isAuthenticated = false;
+            location.href = "login.html";
+        } catch (error) {
+            alert(error.message || "Не удалось выйти из аккаунта");
+        }
+    });
+
+    elements.guideLink?.addEventListener("click", (event) => {
+        if (!state.isAuthenticated) {
             event.preventDefault();
             requireAuth("Чтобы открыть справочник, войдите в аккаунт.");
         }
-    };
+    });
+
+    elements.userBadge?.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (state.isAuthenticated) {
+            elements.userDropdown?.classList.toggle("show");
+        }
+    });
+
+    elements.prevMonth?.addEventListener("click", () => {
+        state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+        renderCalendar();
+    });
+
+    elements.nextMonth?.addEventListener("click", () => {
+        state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+        renderCalendar();
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target === elements.modal) {
+            closeModal();
+        }
+
+        if (event.target === elements.authPromptModal) {
+            closeAuthModal();
+        }
+
+        if (!event.target.closest("#userMenuWrap")) {
+            elements.userDropdown?.classList.remove("show");
+        }
+    });
 }
 
-// ===== ПЕРЕКЛЮЧЕНИЕ МЕСЯЦЕВ =====
-document.getElementById("prevMonth").onclick = () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar();
-};
-
-document.getElementById("nextMonth").onclick = () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar();
-};
-
-// ===== ФОРМАТ ДАТЫ =====
-function formatDate(y, m, d) {
-    return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-}
-
-// ===== ПОДДЕРЖКА =====
-if (supportBtn) {
-    supportBtn.onclick = () => {
-        if (!isAuthenticated) {
-            requireAuth("Чтобы обратиться в поддержку, войдите в аккаунт.");
-            return;
-        }
-
-        if (supportModal) {
-            supportModal.style.display = "flex";
-        }
-    };
-}
-
-if (closeSupport) {
-    closeSupport.onclick = () => {
-        if (supportModal) {
-            supportModal.style.display = "none";
-        }
-    };
-}
-
-if (sendSupport) {
-    sendSupport.onclick = async () => {
-        if (!isAuthenticated) {
-            requireAuth("Чтобы отправить сообщение в поддержку, войдите в аккаунт.");
-            return;
-        }
-
-        const type = document.getElementById("supportType").value;
-        const message = document.getElementById("supportMessage").value.trim();
-
-        if (!message) {
-            alert("Введите сообщение");
-            return;
-        }
-
-        try {
-            const response = await fetch("http://localhost:3000/api/support", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    username: currentUser?.username || "Неизвестно",
-                    type,
-                    message
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                alert("Сообщение отправлено!");
-                document.getElementById("supportMessage").value = "";
-                supportModal.style.display = "none";
-            } else {
-                alert(data.error || "Ошибка отправки");
-            }
-        } catch (error) {
-            alert("Не удалось отправить сообщение. Проверь, запущен ли support server.");
-        }
-    };
-}
-
-// ===== ЗАКРЫТИЕ ПО КЛИКУ ВНЕ ОКНА =====
-window.onclick = (event) => {
-    if (event.target === modal) {
-        closeModal();
-    }
-
-    if (event.target === supportModal) {
-        supportModal.style.display = "none";
-    }
-
-    if (event.target === authPromptModal) {
-        closeAuthModal();
-    }
-};
-
-// ===== ИНИЦИАЛИЗАЦИЯ =====
-async function initPage() {
+async function loadUserAndWorkouts() {
     try {
-        currentUser = await getCurrentUser();
-        isAuthenticated = !!currentUser;;
+        state.currentUser = await getCurrentUser();
+        state.isAuthenticated = Boolean(state.currentUser);
     } catch {
-        currentUser = null;
-        isAuthenticated = false;
+        state.currentUser = null;
+        state.isAuthenticated = false;
     }
 
-    if (isAuthenticated) {
-        if (loginBtn) loginBtn.style.display = "none";
-        if (userBadge) {
-            userBadge.style.display = "flex";
-            userBadge.textContent = currentUser.username[0].toUpperCase();
-
-            userBadge.onclick = async () => {
-                const confirmExit = confirm("Выйти из аккаунта?");
-                if (!confirmExit) return;
-
-                try {
-                    await logoutUser();
-                } catch (_) {}
-
-                location.href = "index.html";
-            };
-        }
-
-        if (pageSubtitle) {
-            pageSubtitle.textContent = "Следи за прогрессом, добавляй тренировки в календарь и анализируй свои результаты.";
-        }
-
-        try {
-            workouts = await getWorkouts();
-        } catch (error) {
-            workouts = [];
-            alert(error.message || "Не удалось загрузить тренировки");
-        }
-    } else {
-        if (userBadge) userBadge.style.display = "none";
-        if (loginBtn) loginBtn.style.display = "inline-flex";
-
-        if (pageSubtitle) {
-            pageSubtitle.textContent = "Это главная страница GymDo. Чтобы сохранять тренировки, открывать справочник и пользоваться функциями приложения, войдите в аккаунт.";
-        }
-
-        workouts = [];
+    if (!state.isAuthenticated) {
+        state.workouts = [];
+        return;
     }
 
+    try {
+        state.workouts = await getWorkouts();
+    } catch (error) {
+        state.workouts = [];
+        alert(error.message || "Не удалось загрузить тренировки");
+    }
+}
+
+async function initPage() {
+    bindEvents();
+    await loadUserAndWorkouts();
+    updateAuthenticatedHeader();
     renderCalendar();
     updateStats();
     renderChart();
+    await loadMuscleMaps();
+}
+
+function parseWorkoutDate(dateString) {
+    if (!dateString) return null;
+    const date = new Date(`${dateString}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getLast7DaysWorkouts() {
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(now.getDate() - 6);
+    start.setHours(0, 0, 0, 0);
+
+    return state.workouts.filter((workout) => {
+        const workoutDate = parseWorkoutDate(workout.date);
+        return workoutDate && workoutDate >= start && workoutDate <= now;
+    });
+}
+
+function calculateSetLoad(set) {
+    const reps = Number(set?.reps || 0);
+    const weight = Number(set?.weight || 0);
+
+    if (weight > 0) {
+        return reps * weight;
+    }
+
+    return reps || 1;
+}
+
+function normalizeMuscleKey(muscleKey) {
+    const aliases = {
+        "midback": "mid-back",
+        "mid-back": "mid-back",
+        "middle-back": "mid-back",
+        "upper-back": "upperBack",
+        "lower-back": "lowerBack"
+    };
+
+    return aliases[muscleKey] || muscleKey;
+}
+
+function buildMuscleLoadMap() {
+    const loadMap = {};
+    const recentWorkouts = getLast7DaysWorkouts();
+
+    recentWorkouts.forEach((workout) => {
+        (workout.exercises || []).forEach((exercise) => {
+            const exerciseData = getExerciseByName(exercise.name);
+            const muscles = exerciseData?.primaryMuscles || [];
+
+            if (!muscles.length) {
+                return;
+            }
+
+            const exerciseLoad = (exercise.sets || []).reduce((sum, set) => {
+                return sum + calculateSetLoad(set);
+            }, 0) || 1;
+
+            muscles.forEach((rawMuscleKey) => {
+                const muscleKey = normalizeMuscleKey(rawMuscleKey);
+
+                if (!muscleSvgMap[muscleKey]) {
+                    console.warn(`Нет muscleSvgMap для ключа: ${muscleKey}`);
+                    return;
+                }
+
+                loadMap[muscleKey] = (loadMap[muscleKey] || 0) + exerciseLoad;
+            });
+        });
+    });
+
+    return loadMap;
+}
+
+function getMuscleIntensityClass(value, maxValue) {
+    if (!value || !maxValue) return "";
+    return "muscle-map-active";
+}
+
+function tryActivateSvgIds(svg, ids, className) {
+    if (!svg || !ids?.length || !className) return;
+
+    ids.forEach((id) => {
+        const safeId = String(id).trim();
+        const escaped = CSS.escape(safeId);
+
+        const candidates = [
+            `#${escaped}`,
+            `[id="${safeId}"]`,
+            `[id="${safeId} "]`
+        ];
+
+        let el = null;
+        for (const selector of candidates) {
+            el = svg.querySelector(selector);
+            if (el) break;
+        }
+
+        if (el) {
+            el.classList.add(className);
+        }
+    });
+}
+
+function renderLegend(loadMap) {
+    if (!elements.muscleLegend) return;
+
+    const items = Object.entries(loadMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    if (!items.length) {
+        elements.muscleLegend.innerHTML = `<span class="muscle-legend-item">Пока нет данных за 7 дней</span>`;
+        return;
+    }
+
+    elements.muscleLegend.innerHTML = items
+        .map(([muscleKey, value]) => {
+            const label = muscleSvgMap[muscleKey]?.label || muscleKey;
+            return `<span class="muscle-legend-item">${label}: ${Math.round(value)}</span>`;
+        })
+        .join("");
+}
+
+function applyMuscleLoadToSvg(frontSvg, backSvg, loadMap) {
+    const values = Object.values(loadMap);
+    const maxValue = values.length ? Math.max(...values) : 0;
+
+    Object.entries(loadMap).forEach(([muscleKey, value]) => {
+        const config = muscleSvgMap[muscleKey];
+        if (!config) return;
+
+        const className = getMuscleIntensityClass(value, maxValue);
+
+        if (config.front) {
+            tryActivateSvgIds(frontSvg, config.front, className);
+        }
+
+        if (config.back) {
+            tryActivateSvgIds(backSvg, config.back, className);
+        }
+    });
+}
+
+async function loadSvgIntoContainer(container, fileName) {
+    if (!container) return null;
+
+    try {
+        const response = await fetch(fileName);
+        if (!response.ok) {
+            throw new Error(`Не удалось загрузить ${fileName}`);
+        }
+
+        const svgText = await response.text();
+        container.innerHTML = svgText;
+
+        return container.querySelector("svg");
+    } catch (error) {
+        console.error(error);
+        container.innerHTML = `<p style="color:#f66;">Ошибка загрузки SVG</p>`;
+        return null;
+    }
+}
+
+async function loadMuscleMaps() {
+    const frontSvg = await loadSvgIntoContainer(elements.frontMapContainer, "front view.svg");
+    const backSvg = await loadSvgIntoContainer(elements.backMapContainer, "back view 3.svg");
+
+    const loadMap = buildMuscleLoadMap();
+    applyMuscleLoadToSvg(frontSvg, backSvg, loadMap);
+    renderLegend(loadMap);
 }
 
 initPage();

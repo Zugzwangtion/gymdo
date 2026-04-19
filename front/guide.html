@@ -14,7 +14,15 @@
         </div>
 
         <div class="nav-right">
-            <div id="userBadge" class="user-badge"></div>
+            <div class="user-menu-wrap" id="userMenuWrap">
+                <div id="userBadge" class="user-badge"></div>
+
+                <div id="userDropdown" class="user-dropdown">
+                    <button type="button" id="profileLogoutBtn" class="user-dropdown-item danger">
+                        Выйти
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -23,6 +31,7 @@
     <div id="guideContainer" class="guide-container"></div>
 
     <script src="api.js"></script>
+    <script src="exercises.js"></script>
     <script src="guide.js"></script>
 </body>
 </html>

@@ -12,10 +12,6 @@ class Workout(models.Model):
 
     class Meta:
         ordering = ['-date', '-created_at']
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'date'], name='unique_workout_per_user_per_date')
-        ]
-
     def __str__(self):
         return f'{self.user.username} - {self.date}'
 

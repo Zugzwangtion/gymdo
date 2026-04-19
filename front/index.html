@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <nav class="navbar">
         <div class="nav-left">
@@ -15,9 +16,20 @@
 
         <div class="nav-right">
             <a href="login.html" id="loginBtn" class="nav-auth-btn">Вход</a>
-            <div id="userBadge" class="user-badge"></div>
+
+            <div class="user-menu-wrap" id="userMenuWrap">
+                <div id="userBadge" class="user-badge"></div>
+
+                <div id="userDropdown" class="user-dropdown">
+                    <button type="button" id="profileLogoutBtn" class="user-dropdown-item danger">
+                        Выйти
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
+
+    
 
     <div id="workoutModal" style="
         display:none;
@@ -90,54 +102,12 @@
         </div>
     </div>
 
-    <div class="arnold-video-container">
-        <div class="video-wrapper">
-            <iframe
-                width="720"
-                height="405"
-                src="https://rutube.ru/play/embed/d23e77a757993299f842be8a7a1153fc/"
-                style="border: none;"
-                allow="clipboard-write; autoplay"
-                webkitAllowFullScreen
-                mozallowfullscreen
-                allowFullScreen>
-            </iframe>
-        </div>
-        <p class="video-caption">"Nobody ever got muscles by watching me lift weights." - Арнольд Шварценеггер</p>
-    </div>
+
 
     <button class="add-btn" onclick="goToAddPage()">+</button>
 
-    <button id="supportBtn" class="support-button">
-        📨 Поддержка
-    </button>
-
-    <div id="supportModal" class="support-modal">
-        <div class="support-content">
-            <h2>Служба поддержки</h2>
-
-            <label>Тип обращения</label>
-            <select id="supportType">
-                <option value="Баг">Сообщить о баге</option>
-                <option value="Предложение">Предложить функцию</option>
-                <option value="Вопрос">Задать вопрос</option>
-            </select>
-
-            <label>Сообщение</label>
-            <textarea
-                id="supportMessage"
-                rows="5"
-                placeholder="Опишите проблему или предложение"></textarea>
-
-            <div class="support-buttons">
-                <button id="sendSupport">Отправить</button>
-                <button id="closeSupport">Отмена</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="authPromptModal" class="support-modal">
-        <div class="support-content auth-dialog">
+    <div id="authPromptModal" class="auth-modal">
+        <div class="auth-modal-content auth-dialog">
             <h2>Нужна авторизация</h2>
             <p id="authPromptText" class="auth-dialog-text">
                 Чтобы пользоваться этой функцией, войдите в аккаунт.
@@ -150,7 +120,30 @@
         </div>
     </div>
 
+    <section class="muscle-map-section">
+        <div class="muscle-map-header">
+            <div>
+                <h2 class="section-title">Карта мышц</h2>
+                <p class="muscle-map-subtitle">Нагрузка за последние 7 дней</p>
+            </div>
+            <div id="muscleLegend" class="muscle-legend"></div>
+        </div>
+
+        <div class="muscle-map-wrapper">
+            <div class="muscle-map-card">
+                <h3 class="muscle-map-view-title">Вид спереди</h3>
+                <div id="frontMapContainer" class="muscle-map-container"></div>
+            </div>
+
+            <div class="muscle-map-card">
+                <h3 class="muscle-map-view-title">Вид сзади</h3>
+                <div id="backMapContainer" class="muscle-map-container"></div>
+            </div>
+        </div>
+    </section>
+
     <script src="api.js"></script>
+    <script src="exercises.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

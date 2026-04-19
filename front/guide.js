@@ -1,229 +1,215 @@
 let currentUser = null;
 
+const guideContainer = document.getElementById("guideContainer");
+const modal = createExerciseModal();
+
+function getExerciseByNameSafe(name) {
+    if (typeof getExerciseByName === "function") {
+        return getExerciseByName(name);
+    }
+
+    if (typeof exercisesDatabase !== "object" || !exercisesDatabase) {
+        return null;
+    }
+
+    return exercisesDatabase[name] || null;
+}
+
+function getExercisesGroupedSafe() {
+    if (typeof getExercisesGroupedByCategory === "function") {
+        return getExercisesGroupedByCategory();
+    }
+
+    const grouped = {};
+
+    if (typeof exercisesDatabase !== "object" || !exercisesDatabase) {
+        return grouped;
+    }
+
+    Object.entries(exercisesDatabase).forEach(([name, exercise]) => {
+        const category = exercise?.category || "Без категории";
+
+        if (!grouped[category]) {
+            grouped[category] = [];
+        }
+
+        grouped[category].push(name);
+    });
+
+    return grouped;
+}
+
+function redirectToLogin() {
+    window.location.href = "login.html";
+}
+
+function createExerciseModal() {
+    const modalElement = document.createElement("div");
+    modalElement.className = "exercise-modal";
+    modalElement.innerHTML = `
+        <div class="modal-content">
+            <button class="modal-close" type="button">✖</button>
+            <h2 id="modalExerciseTitle"></h2>
+            <img id="modalExerciseImage" src="" alt="Упражнение">
+            <p id="modalExerciseDescription"></p>
+        </div>
+    `;
+
+    document.body.appendChild(modalElement);
+    return modalElement;
+}
+
+function closeModal() {
+    modal.style.display = "none";
+}
+
+function openExerciseModal(exerciseName) {
+    const details = getExerciseByNameSafe(exerciseName) || {};
+    const image = details.image || "images/placeholder.jpg";
+    const description = details.description || "Описание пока не добавлено";
+
+    document.getElementById("modalExerciseTitle").textContent = exerciseName;
+    document.getElementById("modalExerciseImage").src = image;
+    document.getElementById("modalExerciseImage").alt = exerciseName;
+    document.getElementById("modalExerciseDescription").textContent = description;
+
+    modal.style.display = "flex";
+}
+
+function createExerciseItem(exerciseName) {
+    const item = document.createElement("li");
+    item.textContent = exerciseName;
+    item.addEventListener("click", () => openExerciseModal(exerciseName));
+    return item;
+}
+
+function createGroupCard(groupName, exercises) {
+    const card = document.createElement("div");
+    card.className = "muscle-card";
+
+    const title = document.createElement("h2");
+    title.textContent = groupName;
+
+    const list = document.createElement("ul");
+    list.className = "exercise-list";
+
+    exercises
+        .slice()
+        .sort((a, b) => a.localeCompare(b, "ru"))
+        .forEach((exerciseName) => {
+            list.appendChild(createExerciseItem(exerciseName));
+        });
+
+    card.append(title, list);
+    return card;
+}
+
+function renderMuscleGroups() {
+    if (!guideContainer) {
+        return;
+    }
+
+    guideContainer.innerHTML = "";
+
+    const groupedExercises = getExercisesGroupedSafe();
+
+    Object.entries(groupedExercises)
+        .sort(([a], [b]) => a.localeCompare(b, "ru"))
+        .forEach(([groupName, exercises]) => {
+            guideContainer.appendChild(createGroupCard(groupName, exercises));
+        });
+}
+
+function bindModalEvents() {
+    modal.querySelector(".modal-close")?.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    });
+}
+
+function bindUserMenu(userDropdown, profileLogoutBtn, userBadge) {
+    if (userBadge && currentUser?.username) {
+        userBadge.textContent = currentUser.username[0].toUpperCase();
+
+        userBadge.addEventListener("click", (event) => {
+            event.stopPropagation();
+            userDropdown?.classList.toggle("show");
+        });
+    }
+
+    profileLogoutBtn?.addEventListener("click", async () => {
+        const confirmed = confirm("Выйти из аккаунта?");
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await logoutUser();
+            window.location.href = "login.html";
+        } catch (error) {
+            alert(error.message || "Не удалось выйти из аккаунта");
+        }
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!event.target.closest("#userMenuWrap")) {
+            userDropdown?.classList.remove("show");
+        }
+    });
+}
+
+function validateExercisesDatabase() {
+    if (typeof exercisesDatabase !== "object" || !exercisesDatabase) {
+        console.warn("База exercisesDatabase не найдена");
+        return;
+    }
+
+    Object.entries(exercisesDatabase).forEach(([name, exercise]) => {
+        if (!exercise.category) {
+            console.warn(`У упражнения "${name}" не указана категория`);
+        }
+
+        if (!exercise.description) {
+            console.warn(`У упражнения "${name}" не указано описание`);
+        }
+
+        if (!exercise.image) {
+            console.warn(`У упражнения "${name}" не указана картинка`);
+        }
+    });
+}
+
 async function initGuidePage() {
     try {
         currentUser = await getCurrentUser();
 
         if (!currentUser) {
-            window.location.href = "login.html";
+            redirectToLogin();
             return;
         }
     } catch {
-        window.location.href = "login.html";
+        redirectToLogin();
         return;
     }
 
-    const userBadge = document.getElementById("userBadge");
-    if (userBadge) {
-        userBadge.textContent = currentUser.username[0].toUpperCase();
+    bindUserMenu(
+        document.getElementById("userDropdown"),
+        document.getElementById("profileLogoutBtn"),
+        document.getElementById("userBadge")
+    );
 
-        userBadge.onclick = async () => {
-            const confirmExit = confirm("Выйти из аккаунта?");
-            if (!confirmExit) return;
-
-            try {
-                await logoutUser();
-            } catch (_) {}
-
-            location.href = "login.html";
-        };
-    }
-
+    bindModalEvents();
+    validateExercisesDatabase();
     renderMuscleGroups();
-}
-
-const exerciseDatabase = {
-    "Грудь": [
-        "Жим штанги лежа",
-        "Жим гантелей лежа",
-        "Жим штанги лежа на наклонной скамье",
-        "Жим гантелей лежа на наклонной скамье"
-    ],
-    "Спина": [
-        "Тяга хамера",
-        "Подтягивания",
-        "Тяга верхнего блока",
-        "Тяга нижнего блока"
-    ],
-    "Плечи": [
-        "Жим гантелей сидя",
-        "Армейский жим",
-        "Махи гантелями"
-    ],
-    "Руки": [
-        "Подъем штанги на бицепс",
-        "Подъем гантелей на бицепс",
-        "Французский жим",
-        "Разгибание рук в кроссовере"
-    ],
-    "Ноги": [
-        "Жим ногами",
-        "Разгибание ног в тренажере",
-        "Сгибание ног в тренажере",
-        "Подъем на носки с утяжелением"
-    ],
-    "Пресс": [
-        "Скручивания в тренажере",
-        "Скручивания на скамье"
-    ]
-};
-
-const exerciseDetails = {
-    "Жим штанги лежа": {
-        image: "images/bench-press.jpg",
-        description: "Базовое упражнение для развития грудных мышц, трицепсов и передних дельт. Выполняется лежа на скамье."
-    },
-    "Жим гантелей лежа": {
-        image: "images/dumbbell-bench-press.jpg",
-        description: "Упражнение на грудные мышцы с большей амплитудой движения, чем в жиме штанги."
-    },
-    "Жим штанги лежа на наклонной скамье": {
-        image: "images/incline-barbell-press.jpg",
-        description: "Смещает нагрузку на верхнюю часть грудных мышц и передние дельты."
-    },
-    "Жим гантелей лежа на наклонной скамье": {
-        image: "images/incline-dumbbell-press.jpg",
-        description: "Упражнение для верхней части грудных мышц с хорошей амплитудой и контролем."
-    },
-
-    "Тяга хамера": {
-        image: "images/hammer-row.jpg",
-        description: "Тяговое упражнение для широчайших и средней части спины. Позволяет изолированно нагрузить спину."
-    },
-    "Подтягивания": {
-        image: "images/pull-ups.jpg",
-        description: "Базовое упражнение с собственным весом для развития широчайших мышц спины и бицепса."
-    },
-    "Тяга верхнего блока": {
-        image: "images/lat-pulldown.jpg",
-        description: "Альтернатива подтягиваниям в тренажере. Развивает широчайшие мышцы спины."
-    },
-    "Тяга нижнего блока": {
-        image: "images/seated-row.jpg",
-        description: "Упражнение для средней части спины, ромбовидных и трапециевидных мышц."
-    },
-
-    "Жим гантелей сидя": {
-        image: "images/seated-dumbbell-press.jpg",
-        description: "Базовое упражнение для развития дельтовидных мышц, особенно переднего пучка."
-    },
-    "Армейский жим": {
-        image: "images/military-press.jpg",
-        description: "Жим штанги стоя. Развивает все пучки дельтовидных мышц и трицепсы."
-    },
-    "Махи гантелями": {
-        image: "images/lateral-raises.jpg",
-        description: "Изолированное упражнение для среднего пучка дельтовидных мышц."
-    },
-
-    "Подъем штанги на бицепс": {
-        image: "images/barbell-curl.jpg",
-        description: "Базовое упражнение для развития бицепса. Работает вся длина мышцы."
-    },
-    "Подъем гантелей на бицепс": {
-        image: "images/dumbbell-curl.jpg",
-        description: "Упражнение для бицепса с возможностью супинации кисти."
-    },
-    "Французский жим": {
-        image: "images/french-press.jpg",
-        description: "Упражнение для трицепса. Выполняется лежа со штангой или гантелями."
-    },
-    "Разгибание рук в кроссовере": {
-        image: "images/triceps-pushdown.jpg",
-        description: "Изолированное упражнение для трицепса в блочном тренажере."
-    },
-
-    "Жим ногами": {
-        image: "images/leg-press.jpg",
-        description: "Упражнение в тренажере для развития квадрицепсов, бицепса бедра и ягодиц."
-    },
-    "Разгибание ног в тренажере": {
-        image: "images/leg-extension.jpg",
-        description: "Изолированное упражнение для квадрицепсов."
-    },
-    "Сгибание ног в тренажере": {
-        image: "images/leg-curl.jpg",
-        description: "Изолированное упражнение для бицепса бедра."
-    },
-    "Подъем на носки с утяжелением": {
-        image: "images/calf-raises.jpg",
-        description: "Упражнение для развития икроножных мышц."
-    },
-
-    "Скручивания в тренажере": {
-        image: "images/crunch-machine.jpg",
-        description: "Упражнение для прямой мышцы живота в специальном тренажере."
-    },
-    "Скручивания на скамье": {
-        image: "images/decline-crunches.jpg",
-        description: "Классическое упражнение для пресса на наклонной скамье."
-    }
-};
-
-const guideContainer = document.getElementById("guideContainer");
-
-const modal = document.createElement("div");
-modal.className = "exercise-modal";
-modal.innerHTML = `
-    <div class="modal-content">
-        <button class="modal-close">✖</button>
-        <h2 id="modalExerciseTitle"></h2>
-        <img id="modalExerciseImage" src="" alt="Упражнение" style="max-width: 100%; border-radius: 8px; margin: 15px 0;">
-        <p id="modalExerciseDescription" style="color: #ccc; line-height: 1.6;"></p>
-    </div>
-`;
-document.body.appendChild(modal);
-
-function openExerciseModal(exerciseName) {
-    const details = exerciseDetails[exerciseName];
-
-    if (details) {
-        document.getElementById("modalExerciseTitle").textContent = exerciseName;
-        document.getElementById("modalExerciseImage").src = details.image;
-        document.getElementById("modalExerciseDescription").textContent = details.description;
-    } else {
-        document.getElementById("modalExerciseTitle").textContent = exerciseName;
-        document.getElementById("modalExerciseImage").src = "images/placeholder.jpg";
-        document.getElementById("modalExerciseDescription").textContent = "Описание пока не добавлено";
-    }
-
-    modal.style.display = "flex";
-}
-
-modal.querySelector(".modal-close").onclick = () => {
-    modal.style.display = "none";
-};
-
-modal.onclick = (e) => {
-    if (e.target === modal) {
-        modal.style.display = "none";
-    }
-};
-
-function renderMuscleGroups() {
-    guideContainer.innerHTML = "";
-
-    for (const group in exerciseDatabase) {
-        const card = document.createElement("div");
-        card.className = "muscle-card";
-
-        const title = document.createElement("h2");
-        title.textContent = group;
-        card.appendChild(title);
-
-        const list = document.createElement("ul");
-        list.className = "exercise-list";
-
-        exerciseDatabase[group].forEach(exercise => {
-            const item = document.createElement("li");
-            item.textContent = exercise;
-            item.onclick = () => openExerciseModal(exercise);
-            list.appendChild(item);
-        });
-
-        card.appendChild(list);
-        guideContainer.appendChild(card);
-    }
 }
 
 initGuidePage();
