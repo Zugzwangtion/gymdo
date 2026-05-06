@@ -1,4 +1,6 @@
 from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -8,6 +10,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 @ensure_csrf_cookie
 def csrf_view(request):
+    # Перед POST-запросами JavaScript просит Django выдать CSRF-cookie.
     return JsonResponse({"detail": "CSRF cookie set"})
 
 User = get_user_model()
@@ -16,6 +19,7 @@ User = get_user_model()
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def me_view(request):
+    # Этот endpoint помогает фронтенду понять, вошел ли пользователь в аккаунт.
     if request.user.is_authenticated:
         return Response({
             "is_authenticated": True,
@@ -34,12 +38,14 @@ def me_view(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def register_view(request):
+    # Простая регистрация по username/password для учебной версии проекта.
     username = request.data.get("username", "").strip()
+    email = request.data.get("email", "").strip()
     password = request.data.get("password", "").strip()
 
-    if not username or not password:
+    if not username or not email or not password:
         return Response(
-            {"error": "Введите username и password"},
+            {"error": "Введите username, email и password"},
             status=400
         )
 
@@ -49,7 +55,15 @@ def register_view(request):
             status=400
         )
 
-    user = User.objects.create_user(username=username, password=password)
+    try:
+        validate_password(password)
+    except ValidationError as error:
+        return Response(
+            {"error": " ".join(error.messages)},
+            status=400
+        )
+
+    user = User.objects.create_user(username=username, email=email, password=password)
 
     login(request, user)
 
@@ -59,6 +73,7 @@ def register_view(request):
         "user": {
             "id": user.id,
             "username": user.username,
+            "email": user.email,
         }
     })
 
@@ -66,6 +81,7 @@ def register_view(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def login_view(request):
+    # authenticate проверяет пароль, login сохраняет пользователя в Django-сессию.
     username = request.data.get("username", "").strip()
     password = request.data.get("password", "").strip()
 
@@ -97,6 +113,7 @@ def login_view(request):
 
 @api_view(["POST"])
 def logout_view(request):
+    # Удаляем данные пользователя из текущей сессии браузера.
     logout(request)
     return Response({
         "ok": True,

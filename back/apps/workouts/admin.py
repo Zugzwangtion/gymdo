@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ExerciseEntry, SetEntry, Workout
+from .models import ExerciseEntry, ExerciseReaction, SetEntry, Workout
 
 
 class SetEntryInline(admin.TabularInline):
@@ -28,3 +28,10 @@ class ExerciseEntryAdmin(admin.ModelAdmin):
 @admin.register(SetEntry)
 class SetEntryAdmin(admin.ModelAdmin):
     list_display = ('id', 'exercise', 'weight', 'reps', 'sort_order')
+
+
+@admin.register(ExerciseReaction)
+class ExerciseReactionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'exercise_name', 'value', 'updated_at')
+    list_filter = ('value',)
+    search_fields = ('user__username', 'exercise_name')

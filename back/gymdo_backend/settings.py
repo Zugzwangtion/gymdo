@@ -5,10 +5,12 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
+# Основные настройки берутся из .env, чтобы секреты не хранить прямо в коде.
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'unsafe-dev-key')
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true'
 ALLOWED_HOSTS = [host.strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if host.strip()]
 
+# Список Django-приложений: системные модули, библиотеки и наши apps/*.
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -16,15 +18,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
     'rest_framework',
     'apps.accounts',
     'apps.workouts',
     'apps.support',
+    'apps.pages',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,6 +57,7 @@ ASGI_APPLICATION = 'gymdo_backend.asgi.application'
 
 DATABASES = {
     'default': {
+        # Для учебного проекта SQLite удобен: база хранится в одном файле db.sqlite3.
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
@@ -77,6 +79,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        # Фронтенд и API используют обычную Django-сессию после логина.
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
@@ -84,19 +87,12 @@ REST_FRAMEWORK = {
     ],
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-]
-CORS_ALLOW_CREDENTIALS = True
-
-CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
-
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
 
+# Настройки Telegram можно оставить пустыми, если Telegram-функции не используются.
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_SUPPORT_CHAT_ID = os.getenv('TELEGRAM_SUPPORT_CHAT_ID', '')
 TELEGRAM_LOGIN_BOT_USERNAME = os.getenv('TELEGRAM_LOGIN_BOT_USERNAME', '')
 
-LOGIN_URL = '/api/auth/telegram/start/'
+LOGIN_URL = '/login/'

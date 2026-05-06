@@ -21,6 +21,7 @@ class ExerciseEntrySerializer(serializers.ModelSerializer):
 
 
 class WorkoutSerializer(serializers.ModelSerializer):
+    # exercises -> sets являются вложенными данными: фронтенд отправляет всю тренировку одним JSON.
     exercises = ExerciseEntrySerializer(many=True)
 
     class Meta:
@@ -45,6 +46,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def calculate_tonnage(exercises_data) -> int:
+        """Считает общий тоннаж: сумма weight * reps по всем подходам."""
         total = Decimal('0')
         for exercise in exercises_data:
             for set_data in exercise.get('sets', []):
@@ -52,6 +54,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
         return int(total)
 
     def create(self, validated_data):
+        # Сначала создаем Workout, потом связанные упражнения и подходы.
         exercises_data = validated_data.pop('exercises', [])
         validated_data['tonnage'] = self.calculate_tonnage(exercises_data)
         workout = Workout.objects.create(**validated_data)
@@ -59,6 +62,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
         return workout
 
     def update(self, instance, validated_data):
+        # При редактировании проще пересоздать вложенные упражнения и подходы.
         exercises_data = validated_data.pop('exercises', None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -72,6 +76,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
         return instance
 
     def _save_nested(self, workout, exercises_data):
+        """Сохраняет упражнения и подходы, которые пришли внутри одной тренировки."""
         for exercise_index, exercise_data in enumerate(exercises_data):
             sets_data = exercise_data.pop('sets', [])
             exercise = ExerciseEntry.objects.create(

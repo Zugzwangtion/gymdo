@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Справочник упражнений</title>
+    <link rel="stylesheet" href="{% static 'pages/style.css' %}">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="{% url 'pages:home' %}" class="logo">GymDo</a>
+            <a href="{% url 'pages:guide' %}" class="nav-link active">Справочник</a>
+        </div>
+
+        <div class="nav-right">
+            <div class="user-menu-wrap" id="userMenuWrap">
+                <div id="userBadge" class="user-badge"></div>
+
+                <div id="userDropdown" class="user-dropdown">
+                    <button type="button" id="profileLogoutBtn" class="user-dropdown-item danger">
+                        Выйти
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <h1>Справочник упражнений</h1>
+
+    <div id="guideContainer" class="guide-container"></div>
+
+    <script src="{% static 'pages/api.js' %}"></script>
+    <script src="{% static 'pages/exercises.js' %}"></script>
+    <script src="{% static 'pages/guide.js' %}"></script>
+</body>
+</html>

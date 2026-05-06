@@ -14,6 +14,7 @@ class SupportCreateView(APIView):
         serializer = SupportMessageCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        # Сначала сохраняем обращение в базе, чтобы оно не потерялось.
         support_message = SupportMessage.objects.create(
             user=request.user,
             type=serializer.validated_data['type'],
@@ -21,6 +22,7 @@ class SupportCreateView(APIView):
         )
 
         try:
+            # Потом пробуем продублировать обращение в Telegram.
             send_support_message(request.user.username, support_message.type, support_message.message)
             support_message.telegram_delivery_ok = True
             support_message.save(update_fields=['telegram_delivery_ok'])

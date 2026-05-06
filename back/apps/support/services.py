@@ -7,6 +7,7 @@ class TelegramSupportError(Exception):
 
 
 def send_support_message(username: str, issue_type: str, message: str):
+    """Отправляет сообщение поддержки в Telegram через Bot API."""
     if not settings.TELEGRAM_BOT_TOKEN or not settings.TELEGRAM_SUPPORT_CHAT_ID:
         raise TelegramSupportError('Telegram support credentials are not configured')
 

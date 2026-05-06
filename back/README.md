@@ -1,53 +1,58 @@
-# GymDo Django backend starter
+# GymDo
 
-Этот каркас переводит проект с localStorage на Django + Django REST Framework + SQLite.
+GymDo - учебное веб-приложение для учета тренировок.
 
-## Что уже заложено
-- session-based auth через Django
-- заготовка входа через Telegram Login Widget
-- модели тренировок: Workout -> ExerciseEntry -> SetEntry
-- endpoint поддержки с отправкой в Telegram Bot API
-- admin для пользователей, Telegram-профилей, тренировок и поддержки
+Проект работает как единое Django-приложение: страницы лежат в `apps.pages/templates`, а CSS, JavaScript и изображения подключаются через Django static files из `apps.pages/static`.
 
-## Структура API
-- `GET /api/auth/me/`
-- `POST /api/auth/logout/`
-- `GET /api/auth/telegram/start/?origin=http://localhost:8000`
-- `GET /api/auth/telegram/callback/`
-- `POST /api/auth/telegram/verify-widget/`
-- `GET /api/workouts/`
-- `POST /api/workouts/`
-- `GET /api/workouts/<id>/`
-- `PUT /api/workouts/<id>/`
-- `DELETE /api/workouts/<id>/`
-- `POST /api/support/`
+## Что умеет проект
 
-## Быстрый старт
+- регистрация и вход по логину и паролю;
+- хранение сессии пользователя через Django;
+- добавление тренировок с упражнениями и подходами;
+- расчет тоннажа тренировки;
+- календарь тренировок;
+- простая статистика и график;
+- справочник упражнений;
+- карта мышц по нагрузке за последние 7 дней;
+- отправка обращения в поддержку через Telegram Bot API, если настроены токены.
+
+## Быстрый запуск
+
 ```bash
+cd back
 python -m venv .venv
-source .venv/bin/activate
+.venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
-python manage.py makemigrations accounts workouts support
 python manage.py migrate
-python manage.py createsuperuser
 python manage.py runserver
 ```
 
-## Что подключить на фронте дальше
-1. Убрать `auth.js` с localStorage.
-2. Кнопку входа заменить на `Войти через Telegram`.
-3. После логина спрашивать `GET /api/auth/me/`.
-4. Главную страницу перевести с localStorage на `GET /api/workouts/`.
-5. Форму добавления тренировки перевести на `POST /api/workouts/`.
-6. Удаление тренировки перевести на `DELETE /api/workouts/<id>/`.
+После запуска открой:
 
-## Telegram auth
-В этом стартере добавлен серверный verify для payload от Telegram Login Widget.
-Для работы нужно:
-- создать бота в BotFather
-- прописать домен/allowed URLs у Telegram Login
-- указать `TELEGRAM_BOT_TOKEN`
-- указать `TELEGRAM_LOGIN_BOT_USERNAME`
+```text
+http://127.0.0.1:8000/
+```
 
-Если захочешь перейти на новый Telegram Login flow / OIDC, backend-слой auth уже выделен отдельно, так что его можно будет заменить без переписывания workout API.
+## Основные страницы
+
+- `/` - главная страница с календарем, статистикой и картой мышц.
+- `/login/` - вход.
+- `/register/` - регистрация.
+- `/add/` - добавление тренировки.
+- `/guide/` - справочник упражнений.
+- `/admin/` - стандартная Django-админка.
+
+## Основные API
+
+- `GET /api/auth/me/` - узнать, вошел ли пользователь.
+- `POST /api/auth/register/` - зарегистрироваться.
+- `POST /api/auth/login/` - войти.
+- `POST /api/auth/logout/` - выйти.
+- `GET /api/workouts/` - получить тренировки текущего пользователя.
+- `POST /api/workouts/` - создать тренировку.
+- `GET /api/workouts/<id>/` - получить одну тренировку.
+- `PUT /api/workouts/<id>/` - обновить тренировку.
+- `DELETE /api/workouts/<id>/` - удалить тренировку.
+- `POST /api/support/` - отправить сообщение в поддержку.
+
+Подробное объяснение структуры смотри в `../PROJECT_DOCUMENTATION.md`.

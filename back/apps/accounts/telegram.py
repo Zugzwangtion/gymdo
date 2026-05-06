@@ -22,6 +22,7 @@ def _secret_key() -> bytes:
 
 
 def verify_telegram_widget_payload(payload: dict) -> dict:
+    """Проверяет, что данные действительно подписаны Telegram, а не подделаны."""
     payload = {k: v for k, v in payload.items() if v not in (None, '')}
     their_hash = payload.pop('hash', None)
     if not their_hash:
@@ -44,6 +45,7 @@ def verify_telegram_widget_payload(payload: dict) -> dict:
 
 
 def get_or_create_user_from_telegram(payload: dict, request: HttpRequest):
+    """Находит пользователя по telegram_id или создает нового Django-пользователя."""
     User = get_user_model()
     telegram_id = int(payload['id'])
     username_base = payload.get('username') or f'tg_{telegram_id}'
