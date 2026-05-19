@@ -59,7 +59,7 @@ function createCategoryBlock(categoryName, exercises) {
 
     const arrow = document.createElement("span");
     arrow.className = "picker-group-arrow";
-    arrow.textContent = "вЊ„";
+    arrow.textContent = "⌄";
 
     headerBtn.append(groupName, arrow);
     headerBtn.addEventListener("click", () => toggleCategory(categoryName));
@@ -87,8 +87,8 @@ function createCategoryBlock(categoryName, exercises) {
 function renderExercisePicker() {
     if (!elements.exercisePickerBody || !elements.pickerTitle || !elements.pickerSubtitle) return;
 
-    elements.pickerTitle.textContent = "Р’С‹Р±РµСЂРё РіСЂСѓРїРїСѓ РјС‹С€С†";
-    elements.pickerSubtitle.textContent = "РќР°Р¶РјРё РЅР° РєР°С‚РµРіРѕСЂРёСЋ, С‡С‚РѕР±С‹ СЂР°СЃРєСЂС‹С‚СЊ СѓРїСЂР°Р¶РЅРµРЅРёСЏ.";
+    elements.pickerTitle.textContent = "Выбери группу мышц";
+    elements.pickerSubtitle.textContent = "Нажми на категорию, чтобы раскрыть упражнения.";
     elements.exercisePickerBody.innerHTML = "";
 
     Object.entries(getExercisesGroupedSafe())
@@ -120,7 +120,7 @@ function addExercise(exerciseName) {
     state.exercises.push({
         id: generateId(),
         name: exerciseName,
-        category: exerciseData?.category || "РЈРїСЂР°Р¶РЅРµРЅРёРµ",
+        category: exerciseData?.category || "Упражнение",
         image: exerciseData?.image || "",
         previous,
         sets: createSetsFromPrevious(previous)
@@ -275,15 +275,15 @@ function createSetRow(exercise, set, index) {
     const doneButton = document.createElement("button");
     doneButton.type = "button";
     doneButton.className = "finish-set-button";
-    doneButton.textContent = "вњ“";
-    doneButton.title = "Р—Р°РІРµСЂС€РёС‚СЊ РїРѕРґС…РѕРґ";
+    doneButton.textContent = "✓";
+    doneButton.title = "Завершить подход";
     doneButton.addEventListener("click", () => finishSet(exercise.id, set.id));
 
     const editButton = document.createElement("button");
     editButton.type = "button";
     editButton.className = "remove-set-inline";
-    editButton.textContent = "Г—";
-    editButton.title = "РЈРґР°Р»РёС‚СЊ РїРѕРґС…РѕРґ";
+    editButton.textContent = "×";
+    editButton.title = "Удалить подход";
     editButton.addEventListener("click", () => removeSet(exercise.id, set.id));
 
     if (state.mode === "execution") {
@@ -323,8 +323,8 @@ function createExerciseCard(exercise) {
 
     const subtitle = document.createElement("p");
     subtitle.textContent = exercise.previous?.workout?.date
-        ? `РџСЂРµРґС‹РґСѓС‰Р°СЏ: ${exercise.previous.workout.date}`
-        : "Р Р°РЅСЊС€Рµ РЅРµ РІС‹РїРѕР»РЅСЏР»РѕСЃСЊ";
+        ? `Предыдущая: ${exercise.previous.workout.date}`
+        : "Раньше не выполнялось";
 
     titleWrap.append(title, subtitle);
 
@@ -332,7 +332,7 @@ function createExerciseCard(exercise) {
     removeExerciseButton.type = "button";
     removeExerciseButton.className = "remove-exercise-button compact";
     removeExerciseButton.textContent = "в‹®";
-    removeExerciseButton.title = "РЈРґР°Р»РёС‚СЊ СѓРїСЂР°Р¶РЅРµРЅРёРµ";
+    removeExerciseButton.title = "Удалить упражнение";
     removeExerciseButton.addEventListener("click", (event) => {
         event.stopPropagation();
         removeExercise(exercise.id);
@@ -349,14 +349,14 @@ function createExerciseCard(exercise) {
 
     const setsTitle = document.createElement("div");
     setsTitle.className = "sets-title";
-    setsTitle.textContent = "РџРѕРґС…РѕРґС‹";
+    setsTitle.textContent = "Подходы";
 
     const setsHeader = document.createElement("div");
     setsHeader.className = "setsHeader tracking-sets-header";
     setsHeader.innerHTML = `
-        <span>в„–</span>
-        <span>Р’РµСЃ, РєРі</span>
-        <span>РџРѕРІС‚РѕСЂРµРЅРёСЏ</span>
+        <span>№</span>
+        <span>Вес, кг</span>
+        <span>Повторения</span>
         <span></span>
     `;
 
@@ -370,8 +370,8 @@ function createExerciseCard(exercise) {
     const statsBlock = document.createElement("div");
     statsBlock.className = "exercise-live-stats";
     statsBlock.innerHTML = `
-        <span>${formatWeight(stats.tonnage / 1000)} С‚ вЂў ${stats.sets} / ${stats.totalSets} вЂў ${stats.reps}</span>
-        <span class="${stats.previousTonnage ? "muted-red" : ""}">${stats.previousTonnage ? `${formatWeight(stats.previousTonnage / 1000)} С‚ РїСЂРµРґ.` : "РЅРµС‚ РёСЃС‚РѕСЂРёРё"}</span>
+        <span>${formatWeight(stats.tonnage / 1000)} т • ${stats.sets} / ${stats.totalSets} • ${stats.reps}</span>
+        <span class="${stats.previousTonnage ? "muted-red" : ""}">${stats.previousTonnage ? `${formatWeight(stats.previousTonnage / 1000)} т пред.` : "нет истории"}</span>
     `;
 
     const actions = document.createElement("div");
@@ -380,14 +380,14 @@ function createExerciseCard(exercise) {
     const finishExerciseButton = document.createElement("button");
     finishExerciseButton.type = "button";
     finishExerciseButton.className = "finish-exercise-button";
-    finishExerciseButton.textContent = "Р—Р°РІРµСЂС€РёС‚СЊ СѓРїСЂР°Р¶РЅРµРЅРёРµ";
+    finishExerciseButton.textContent = "Завершить упражнение";
     finishExerciseButton.addEventListener("click", () => finishExercise(exercise.id));
 
     const addSetButton = document.createElement("button");
     addSetButton.type = "button";
     addSetButton.className = "add-set-button compact-add-set";
     addSetButton.textContent = "+";
-    addSetButton.title = "Р”РѕР±Р°РІРёС‚СЊ РїРѕРґС…РѕРґ";
+    addSetButton.title = "Добавить подход";
     addSetButton.addEventListener("click", () => addSet(exercise.id));
 
     if (state.mode === "execution") {
@@ -443,7 +443,7 @@ function renderSetEditor(exercise, set, index) {
 
     const titleBlock = document.createElement("div");
     const title = document.createElement("h2");
-    title.textContent = `РџРѕРґС…РѕРґ ${index + 1}`;
+    title.textContent = `Подход ${index + 1}`;
     const subtitle = document.createElement("p");
     subtitle.textContent = exercise.name;
     titleBlock.append(title, subtitle);
@@ -451,7 +451,7 @@ function renderSetEditor(exercise, set, index) {
     const doneButton = document.createElement("button");
     doneButton.type = "button";
     doneButton.className = "set-editor-done";
-    doneButton.textContent = "вњ“";
+    doneButton.textContent = "✓";
     doneButton.addEventListener("click", closeSetEditor);
     header.append(titleBlock, doneButton);
 
@@ -468,7 +468,7 @@ function renderSetEditor(exercise, set, index) {
 
         const minus = document.createElement("button");
         minus.type = "button";
-        minus.textContent = "в€’";
+        minus.textContent = "−";
 
         const value = document.createElement("input");
         value.type = "number";
@@ -512,7 +512,7 @@ function renderSetEditor(exercise, set, index) {
 
     const effortLabel = document.createElement("div");
     effortLabel.className = "set-editor-label";
-    effortLabel.textContent = "РЈСЃРёР»РёРµ";
+    effortLabel.textContent = "Усилие";
 
     const effortGrid = document.createElement("div");
     effortGrid.className = "effort-grid";
@@ -533,12 +533,12 @@ function renderSetEditor(exercise, set, index) {
     const stats = document.createElement("section");
     stats.className = "set-editor-section editor-stats";
     const tonnage = Number(set.weight || 0) * Number(set.reps || 0);
-    stats.innerHTML = `<strong>РЎС‚Р°С‚РёСЃС‚РёРєР°</strong><span>РўРѕРЅРЅР°Р¶: ${formatWeight(tonnage / 1000)} С‚</span>`;
+    stats.innerHTML = `<strong>Статистика</strong><span>Тоннаж: ${formatWeight(tonnage / 1000)} т</span>`;
 
     const removeButton = document.createElement("button");
     removeButton.type = "button";
     removeButton.className = "editor-remove-set";
-    removeButton.textContent = "РЈРґР°Р»РёС‚СЊ РїРѕРґС…РѕРґ";
+    removeButton.textContent = "Удалить подход";
     removeButton.addEventListener("click", () => {
         removeSet(exercise.id, set.id);
         closeSetEditor();
@@ -546,8 +546,8 @@ function renderSetEditor(exercise, set, index) {
 
     panel.append(
         header,
-        makeStepper("Р’РµСЃ, РєРі", "weight", 0.5, previousSet?.weight ? `РџСЂРѕС€Р»С‹Р№ РІРµСЃ: ${formatWeight(previousSet.weight)} РєРі` : ""),
-        makeStepper("РџРѕРІС‚РѕСЂРµРЅРёСЏ", "reps", 1, previousSet?.reps ? `РџСЂРѕС€Р»С‹Рµ РїРѕРІС‚РѕСЂС‹: ${formatNumber(previousSet.reps)}` : ""),
+        makeStepper("Вес, кг", "weight", 0.5, previousSet?.weight ? `Прошлый вес: ${formatWeight(previousSet.weight)} кг` : ""),
+        makeStepper("Повторения", "reps", 1, previousSet?.reps ? `Прошлые повторы: ${formatNumber(previousSet.reps)}` : ""),
         effortSection,
         stats,
         removeButton
@@ -576,12 +576,12 @@ async function handleSubmit(event) {
             stopExecutionTimer();
         }
         await createWorkout(payload);
-        alert("РўСЂРµРЅРёСЂРѕРІРєР° СЃРѕС…СЂР°РЅРµРЅР°");
+        alert("Тренировка сохранена");
         window.location.href = "/";
     } catch (error) {
         if (state.mode === "execution") {
             startExecutionTimer();
         }
-        alert(error.message || "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ С‚СЂРµРЅРёСЂРѕРІРєРё");
+        alert(error.message || "Ошибка сохранения тренировки");
     }
 }

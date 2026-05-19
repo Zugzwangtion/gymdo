@@ -9,7 +9,7 @@
     }
 
     profileLogoutBtn?.addEventListener("click", async () => {
-        const confirmed = confirm("Р’С‹Р№С‚Рё РёР· Р°РєРєР°СѓРЅС‚Р°?");
+        const confirmed = confirm("Выйти из аккаунта?");
         if (!confirmed) {
             return;
         }
@@ -18,7 +18,7 @@
             await logoutUser();
             window.location.href = "/login/";
         } catch (error) {
-            alert(error.message || "РќРµ СѓРґР°Р»РѕСЃСЊ РІС‹Р№С‚Рё РёР· Р°РєРєР°СѓРЅС‚Р°");
+            alert(error.message || "Не удалось выйти из аккаунта");
         }
     });
 

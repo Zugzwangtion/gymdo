@@ -2,7 +2,7 @@
     return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
-function requireAuth(message = "Р§С‚РѕР±С‹ РїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ СЌС‚РѕР№ С„СѓРЅРєС†РёРµР№, РІРѕР№РґРёС‚Рµ РІ Р°РєРєР°СѓРЅС‚.") {
+function requireAuth(message = "Чтобы пользоваться этой функцией, войдите в аккаунт.") {
     if (!elements.authPromptModal || !elements.authPromptText) {
         alert(message);
         return;
@@ -32,7 +32,7 @@ function openModal() {
 
 function goToAddPage(date = "") {
     if (!state.isAuthenticated) {
-        requireAuth("Р§С‚РѕР±С‹ РґРѕР±Р°РІРёС‚СЊ С‚СЂРµРЅРёСЂРѕРІРєСѓ, РІРѕР№РґРёС‚Рµ РІ Р°РєРєР°СѓРЅС‚.");
+        requireAuth("Чтобы добавить тренировку, войдите в аккаунт.");
         return;
     }
 
@@ -63,7 +63,7 @@ function createCalendarDay(day, dateString, dayWorkouts) {
 
     dayCell.addEventListener("click", () => {
         if (!state.isAuthenticated) {
-            requireAuth("Р§С‚РѕР±С‹ РѕС‚РєСЂС‹С‚СЊ РєР°Р»РµРЅРґР°СЂСЊ С‚СЂРµРЅРёСЂРѕРІРѕРє Рё РґРѕР±Р°РІР»СЏС‚СЊ Р·Р°РЅСЏС‚РёСЏ, РІРѕР№РґРёС‚Рµ РІ Р°РєРєР°СѓРЅС‚.");
+            requireAuth("Чтобы открыть календарь тренировок и добавлять занятия, войдите в аккаунт.");
             return;
         }
 
@@ -116,7 +116,7 @@ function showDayWorkouts(dateString, dayWorkouts) {
     elements.modalContent.innerHTML = "";
 
     const title = document.createElement("h2");
-    title.textContent = `${dateString} вЂ” С‚СЂРµРЅРёСЂРѕРІРѕРє: ${dayWorkouts.length}`;
+    title.textContent = `${dateString} — тренировок: ${dayWorkouts.length}`;
     elements.modalContent.appendChild(title);
 
     dayWorkouts.forEach((workout, index) => {
@@ -125,15 +125,15 @@ function showDayWorkouts(dateString, dayWorkouts) {
 
         const openButton = document.createElement("button");
         openButton.type = "button";
-        openButton.textContent = "РћС‚РєСЂС‹С‚СЊ";
+        openButton.textContent = "Открыть";
         openButton.addEventListener("click", () => showWorkoutDetails(workout));
 
         card.append(
             Object.assign(document.createElement("h3"), {
-                textContent: `РўСЂРµРЅРёСЂРѕРІРєР° ${index + 1}`
+                textContent: `Тренировка ${index + 1}`
             }),
-            createInfoParagraph(`Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ: ${workout.duration ?? 0} РјРёРЅ`),
-            createInfoParagraph(`РўРѕРЅРЅР°Р¶: ${workout.tonnage ?? 0}`),
+            createInfoParagraph(`Длительность: ${workout.duration ?? 0} мин`),
+            createInfoParagraph(`Тоннаж: ${workout.tonnage ?? 0}`),
             openButton
         );
 
@@ -142,7 +142,7 @@ function showDayWorkouts(dateString, dayWorkouts) {
 
     const addButton = document.createElement("button");
     addButton.type = "button";
-    addButton.textContent = "+ Р”РѕР±Р°РІРёС‚СЊ РµС‰С‘ С‚СЂРµРЅРёСЂРѕРІРєСѓ";
+    addButton.textContent = "+ Добавить ещё тренировку";
     addButton.style.marginTop = "16px";
     addButton.addEventListener("click", () => goToAddPage(dateString));
 

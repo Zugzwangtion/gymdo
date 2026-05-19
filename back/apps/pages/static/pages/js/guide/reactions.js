@@ -59,7 +59,7 @@ async function loadExerciseReactions() {
     try {
         applyExerciseReactions(await getExerciseReactions());
     } catch (error) {
-        console.warn(error.message || "РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ СЂРµР°РєС†РёРё");
+        console.warn(error.message || "Не удалось загрузить реакции");
     }
 }
 
@@ -69,7 +69,7 @@ async function handleReactionClick(exerciseName, value) {
         setReactionState(reaction);
         applyReactionState(exerciseName);
     } catch (error) {
-        alert(error.message || "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ СЂРµР°РєС†РёСЋ");
+        alert(error.message || "Не удалось сохранить реакцию");
     }
 }
 
@@ -82,7 +82,7 @@ function createReactionButton(exerciseName, value, label) {
 
     const icon = document.createElement("span");
     icon.className = "reaction-icon";
-    icon.textContent = value === "like" ? "рџ‘Ќ" : "рџ‘Ћ";
+    icon.textContent = value === "like" ? "👍" : "👎";
 
     const count = document.createElement("span");
     count.className = "reaction-count";
@@ -109,7 +109,7 @@ function startReactionStream() {
     stopReactionStream();
 
     if (typeof EventSource !== "function") {
-        console.warn("Р‘СЂР°СѓР·РµСЂ РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚ SSE");
+        console.warn("Браузер не поддерживает SSE");
         return;
     }
 
@@ -119,12 +119,12 @@ function startReactionStream() {
         try {
             applyExerciseReactions(JSON.parse(event.data));
         } catch (error) {
-            console.warn(error.message || "РќРµ СѓРґР°Р»РѕСЃСЊ СЂР°Р·РѕР±СЂР°С‚СЊ РѕР±РЅРѕРІР»РµРЅРёРµ СЂРµР°РєС†РёР№");
+            console.warn(error.message || "Не удалось разобрать обновление реакций");
         }
     });
 
     reactionEventSource.addEventListener("error", () => {
-        console.warn("SSE-СЃРѕРµРґРёРЅРµРЅРёРµ СЂРµР°РєС†РёР№ РІСЂРµРјРµРЅРЅРѕ РЅРµРґРѕСЃС‚СѓРїРЅРѕ");
+        console.warn("SSE-соединение реакций временно недоступно");
     });
 }
 

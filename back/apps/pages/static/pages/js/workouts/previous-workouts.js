@@ -7,7 +7,7 @@
     if (typeof exercisesDatabase !== "object" || !exercisesDatabase) return grouped;
 
     Object.entries(exercisesDatabase).forEach(([name, exercise]) => {
-        const category = exercise?.category || "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё";
+        const category = exercise?.category || "Без категории";
         grouped[category] = grouped[category] || [];
         grouped[category].push(name);
     });

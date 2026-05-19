@@ -28,7 +28,7 @@ async function handleLoginSubmit(event) {
     const password = getFieldValue("password");
 
     if (!username || !password) {
-        alert("Р—Р°РїРѕР»РЅРё Р»РѕРіРёРЅ Рё РїР°СЂРѕР»СЊ");
+        alert("Заполни логин и пароль");
         return;
     }
 
@@ -36,7 +36,7 @@ async function handleLoginSubmit(event) {
         await loginUser(username, password);
         window.location.href = "/";
     } catch (error) {
-        alert(error.message || "РќРµРІРµСЂРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ");
+        alert(error.message || "Неверный логин или пароль");
     }
 }
 
@@ -53,7 +53,7 @@ async function handleRegisterSubmit(event) {
     const password = getFieldValue("password");
 
     if (!username || !password || !email) {
-        alert("Р—Р°РїРѕР»РЅРё Р»РѕРіРёРЅ, email Рё РїР°СЂРѕР»СЊ");
+        alert("Заполни логин, email и пароль");
         return;
     }
 
@@ -61,7 +61,7 @@ async function handleRegisterSubmit(event) {
         await registerUser(username, password, email);
         window.location.href = "/";
     } catch (error) {
-        alert(error.message || "РћС€РёР±РєР° СЂРµРіРёСЃС‚СЂР°С†РёРё");
+        alert(error.message || "Ошибка регистрации");
     }
 }
 

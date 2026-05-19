@@ -35,126 +35,126 @@ const elements = {
 };
 
 const exerciseMuscleMap = {
-    "Р–РёРј С€С‚Р°РЅРіРё Р»РµР¶Р°": ["chest", "front-shoulders", "triceps"],
-    "Р–РёРј РіР°РЅС‚РµР»РµР№ Р»РµР¶Р°": ["chest", "front-shoulders", "triceps"],
-    "Р–РёРј С€С‚Р°РЅРіРё Р»РµР¶Р° РЅР° РЅР°РєР»РѕРЅРЅРѕР№ СЃРєР°РјСЊРµ": ["upper-chest", "front-shoulders", "triceps"],
-    "Р–РёРј РіР°РЅС‚РµР»РµР№ Р»РµР¶Р° РЅР° РЅР°РєР»РѕРЅРЅРѕР№ СЃРєР°РјСЊРµ": ["upper-chest", "front-shoulders", "triceps"],
+    "Жим штанги лежа": ["chest", "front-shoulders", "triceps"],
+    "Жим гантелей лежа": ["chest", "front-shoulders", "triceps"],
+    "Жим штанги лежа на наклонной скамье": ["upper-chest", "front-shoulders", "triceps"],
+    "Жим гантелей лежа на наклонной скамье": ["upper-chest", "front-shoulders", "triceps"],
 
-    "РўСЏРіР° С…Р°РјРµСЂР°": ["lats", "mid-back", "rear-shoulders", "biceps"],
-    "РџРѕРґС‚СЏРіРёРІР°РЅРёСЏ": ["lats", "biceps", "forearms"],
-    "РўСЏРіР° РІРµСЂС…РЅРµРіРѕ Р±Р»РѕРєР°": ["lats", "biceps", "forearms"],
-    "РўСЏРіР° РЅРёР¶РЅРµРіРѕ Р±Р»РѕРєР°": ["mid-back", "lats", "biceps"],
+    "Тяга хамера": ["lats", "mid-back", "rear-shoulders", "biceps"],
+    "Подтягивания": ["lats", "biceps", "forearms"],
+    "Тяга верхнего блока": ["lats", "biceps", "forearms"],
+    "Тяга нижнего блока": ["mid-back", "lats", "biceps"],
 
-    "Р–РёРј РіР°РЅС‚РµР»РµР№ СЃРёРґСЏ": ["front-shoulders", "side-shoulders", "triceps"],
-    "РђСЂРјРµР№СЃРєРёР№ Р¶РёРј": ["front-shoulders", "side-shoulders", "triceps"],
-    "РњР°С…Рё РіР°РЅС‚РµР»СЏРјРё": ["side-shoulders"],
+    "Жим гантелей сидя": ["front-shoulders", "side-shoulders", "triceps"],
+    "Армейский жим": ["front-shoulders", "side-shoulders", "triceps"],
+    "Махи гантелями": ["side-shoulders"],
 
-    "РџРѕРґСЉРµРј С€С‚Р°РЅРіРё РЅР° Р±РёС†РµРїСЃ": ["biceps", "forearms"],
-    "РџРѕРґСЉРµРј РіР°РЅС‚РµР»РµР№ РЅР° Р±РёС†РµРїСЃ": ["biceps", "forearms"],
-    "Р¤СЂР°РЅС†СѓР·СЃРєРёР№ Р¶РёРј": ["triceps"],
-    "Р Р°Р·РіРёР±Р°РЅРёРµ СЂСѓРє РІ РєСЂРѕСЃСЃРѕРІРµСЂРµ": ["triceps"],
+    "Подъем штанги на бицепс": ["biceps", "forearms"],
+    "Подъем гантелей на бицепс": ["biceps", "forearms"],
+    "Французский жим": ["triceps"],
+    "Разгибание рук в кроссовере": ["triceps"],
 
-    "Р–РёРј РЅРѕРіР°РјРё": ["quads", "glutes", "hamstrings"],
-    "Р Р°Р·РіРёР±Р°РЅРёРµ РЅРѕРі РІ С‚СЂРµРЅР°Р¶РµСЂРµ": ["quads"],
-    "РЎРіРёР±Р°РЅРёРµ РЅРѕРі РІ С‚СЂРµРЅР°Р¶РµСЂРµ": ["hamstrings"],
-    "РџРѕРґСЉРµРј РЅР° РЅРѕСЃРєРё СЃ СѓС‚СЏР¶РµР»РµРЅРёРµРј": ["calves"],
+    "Жим ногами": ["quads", "glutes", "hamstrings"],
+    "Разгибание ног в тренажере": ["quads"],
+    "Сгибание ног в тренажере": ["hamstrings"],
+    "Подъем на носки с утяжелением": ["calves"],
 
-    "РЎРєСЂСѓС‡РёРІР°РЅРёСЏ РІ С‚СЂРµРЅР°Р¶РµСЂРµ": ["abs"],
-    "РЎРєСЂСѓС‡РёРІР°РЅРёСЏ РЅР° СЃРєР°РјСЊРµ": ["abs"]
+    "Скручивания в тренажере": ["abs"],
+    "Скручивания на скамье": ["abs"]
 };
 
 const muscleSvgMap = {
     chest: {
         front: ["chest-left", "chest-right"],
-        label: "Р“СЂСѓРґСЊ"
+        label: "Грудь"
     },
 
     abs: {
         front: ["abs-upper", "abs-lower"],
-        label: "РџСЂРµСЃСЃ"
+        label: "Пресс"
     },
 
     obliques: {
         front: ["oblique-left", "oblique-right"],
-        label: "РљРѕСЃС‹Рµ РјС‹С€С†С‹ Р¶РёРІРѕС‚Р°"
+        label: "Косые мышцы живота"
     },
 
     biceps: {
-        front: ["bicep-left", "bicep-right "], // Сѓ РїСЂР°РІРѕРіРѕ id СЃ РїСЂРѕР±РµР»РѕРј РІ РєРѕРЅС†Рµ
-        label: "Р‘РёС†РµРїСЃ"
+        front: ["bicep-left", "bicep-right "], // у правого id с пробелом в конце
+        label: "Бицепс"
     },
 
     triceps: {
         back: ["triceps-left", "triceps-right"],
-        label: "РўСЂРёС†РµРїСЃ"
+        label: "Трицепс"
     },
 
     forearms: {
         front: ["forearm-left", "forearm-right"],
         back: ["forearms-back-left", "forearms-back-right"],
-        label: "РџСЂРµРґРїР»РµС‡СЊСЏ"
+        label: "Предплечья"
     },
 
     shoulders: {
-        front: ["shoulder-left ", "shoulder-right"], // Сѓ Р»РµРІРѕРіРѕ id СЃ РїСЂРѕР±РµР»РѕРј РІ РєРѕРЅС†Рµ
+        front: ["shoulder-left ", "shoulder-right"], // у левого id с пробелом в конце
         back: ["shoulder-left", "shoulder-right", "shoulder"],
-        label: "РџР»РµС‡Рё"
+        label: "Плечи"
     },
 
 
     traps: {
         front: ["trap-front-left", "trap-front-right"],
         back: ["traps"],
-        label: "РўСЂР°РїРµС†РёРё"
+        label: "Трапеции"
     },
 
     lats: {
         back: ["lat-left", "lat-right"],
-        label: "РЁРёСЂРѕС‡Р°Р№С€РёРµ"
+        label: "Широчайшие"
     },
 
 
     upperBack: {
         back: ["up-medium-back"],
-        label: "Р’РµСЂС… СЃРїРёРЅС‹"
+        label: "Верх спины"
     },
 
     lowerBack: {
         back: ["down-medium-back"],
-        label: "РќРёР· СЃРїРёРЅС‹"
+        label: "Низ спины"
     },
 
     glutes: {
         back: ["glutes-left", "glutes-right"],
-        label: "РЇРіРѕРґРёС†С‹"
+        label: "Ягодицы"
     },
 
     quads: {
-        front: ["quad-left ", "quad-right"], // Сѓ Р»РµРІРѕРіРѕ id СЃ РїСЂРѕР±РµР»РѕРј РІ РєРѕРЅС†Рµ
-        label: "РљРІР°РґСЂРёС†РµРїСЃС‹"
+        front: ["quad-left ", "quad-right"], // у левого id с пробелом в конце
+        label: "Квадрицепсы"
     },
 
     hamstrings: {
         back: ["hamstring-left", "hamstring-right"],
-        label: "Р‘РёС†РµРїСЃ Р±РµРґСЂР°"
+        label: "Бицепс бедра"
     },
 
     calves: {
         front: ["calf-front-left", "calf-front-right"],
         back: ["calf-left", "calf-right"],
-        label: "РРєСЂС‹"
+        label: "Икры"
     },
 
     adductors: {
         front: ["adductor-left", "adductor-right"],
         back: ["adduktor-left", "adduktor-right"],
-        label: "РџСЂРёРІРѕРґСЏС‰РёРµ РјС‹С€С†С‹"
+        label: "Приводящие мышцы"
     },
 
     neck: {
         front: ["neck-front"],
         back: ["neck-back"],
-        label: "РЁРµСЏ"
+        label: "Шея"
     }
 };
 

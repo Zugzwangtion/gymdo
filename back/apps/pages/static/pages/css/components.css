@@ -210,7 +210,7 @@ button:hover {
     font-size: 16px;
     margin: 0;
 }
-/* ===== Р’РР”Р•Рћ РЎ РђР РќРћР›Р¬Р”РћРњ ===== */
+/* ===== ВИДЕО С АРНОЛЬДОМ ===== */
 .arnold-video-container {
     max-width: 800px;
     margin: 60px auto 40px;
@@ -327,32 +327,32 @@ input, textarea, select {
     outline: none;
 }
 
-/* РћР‘РЇР—РђРўР•Р›Р¬РќР«Р• */
+/* ОБЯЗАТЕЛЬНЫЕ */
 input:required {
     border-left: 4px solid #ff9800;
 }
 
-/* Р’РђР›РР”РќР«Р• */
+/* ВАЛИДНЫЕ */
 input:valid {
     border-color: #4caf50;
 }
 
-/* РќР•Р’РђР›РР”РќР«Р• */
+/* НЕВАЛИДНЫЕ */
 input:invalid {
     border-color: #f44336;
 }
 
-/* Р¤РћРљРЈРЎ */
+/* ФОКУС */
 input:focus {
     border-color: #2196f3;
 }
 
-/* РџРћР”РЎРљРђР—РљР */
+/* ПОДСКАЗКИ */
 input::placeholder {
     color: #888;
 }
 
-/* ===== РћР‘РќРћР’Р›Р•РќРќРђРЇ РЎРўР РђРќРР¦Рђ Р”РћР‘РђР’Р›Р•РќРРЇ ===== */
+/* ===== ОБНОВЛЕННАЯ СТРАНИЦА ДОБАВЛЕНИЯ ===== */
 .user-menu-wrap {
     position: relative;
     display: flex;

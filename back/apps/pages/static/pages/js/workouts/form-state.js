@@ -1,12 +1,12 @@
 ﻿let currentUser = null;
 
 const effortOptions = [
-    { value: "", label: "РќРµ РІС‹Р±СЂР°РЅРѕ", tone: "neutral" },
-    { value: "warmup", label: "Р Р°Р·РјРёРЅ.", tone: "warmup" },
-    { value: "low", label: "РќРёР·РєРѕРµ", tone: "low" },
-    { value: "medium", label: "РЎСЂРµРґРЅРµРµ", tone: "medium" },
-    { value: "high", label: "Р’С‹СЃРѕРєРѕРµ", tone: "high" },
-    { value: "max", label: "РњР°РєСЃРёРј.", tone: "max" }
+    { value: "", label: "Не выбрано", tone: "neutral" },
+    { value: "warmup", label: "Размин.", tone: "warmup" },
+    { value: "low", label: "Низкое", tone: "low" },
+    { value: "medium", label: "Среднее", tone: "medium" },
+    { value: "high", label: "Высокое", tone: "high" },
+    { value: "max", label: "Максим.", tone: "max" }
 ];
 
 const state = {

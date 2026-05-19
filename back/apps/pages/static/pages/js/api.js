@@ -68,7 +68,7 @@ function getErrorMessage(data) {
         data?.detail ||
         data?.error ||
         data?.message ||
-        (typeof data === "string" ? data : "РћС€РёР±РєР° Р·Р°РїСЂРѕСЃР°")
+        (typeof data === "string" ? data : "Ошибка запроса")
     );
 }
 

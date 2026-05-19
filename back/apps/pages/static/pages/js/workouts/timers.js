@@ -68,7 +68,7 @@ function setWorkoutMode(mode) {
         elements.durationInput.required = !isExecution;
     }
     if (elements.submitWorkoutButton) {
-        elements.submitWorkoutButton.textContent = isExecution ? "Р—Р°РІРµСЂС€РёС‚СЊ С‚СЂРµРЅРёСЂРѕРІРєСѓ" : "РЎРѕС…СЂР°РЅРёС‚СЊ С‚СЂРµРЅРёСЂРѕРІРєСѓ";
+        elements.submitWorkoutButton.textContent = isExecution ? "Завершить тренировку" : "Сохранить тренировку";
     }
 
     if (isExecution) {

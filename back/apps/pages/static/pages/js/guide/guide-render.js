@@ -29,7 +29,7 @@ function getExercisesGroupedSafe() {
     }
 
     Object.entries(exercisesDatabase).forEach(([name, exercise]) => {
-        const category = exercise?.category || "Р‘РµР· РєР°С‚РµРіРѕСЂРёРё";
+        const category = exercise?.category || "Без категории";
 
         if (!grouped[category]) {
             grouped[category] = [];
@@ -45,8 +45,8 @@ function createReactionControls(exerciseName) {
     const controls = document.createElement("div");
     controls.className = "exercise-reactions";
     controls.append(
-        createReactionButton(exerciseName, "like", "РќСЂР°РІРёС‚СЃСЏ"),
-        createReactionButton(exerciseName, "dislike", "РќРµ РЅСЂР°РІРёС‚СЃСЏ")
+        createReactionButton(exerciseName, "like", "Нравится"),
+        createReactionButton(exerciseName, "dislike", "Не нравится")
     );
     return controls;
 }
@@ -105,21 +105,21 @@ function renderMuscleGroups() {
 
 function validateExercisesDatabase() {
     if (typeof exercisesDatabase !== "object" || !exercisesDatabase) {
-        console.warn("Р‘Р°Р·Р° exercisesDatabase РЅРµ РЅР°Р№РґРµРЅР°");
+        console.warn("База exercisesDatabase не найдена");
         return;
     }
 
     Object.entries(exercisesDatabase).forEach(([name, exercise]) => {
         if (!exercise.category) {
-            console.warn(`РЈ СѓРїСЂР°Р¶РЅРµРЅРёСЏ "${name}" РЅРµ СѓРєР°Р·Р°РЅР° РєР°С‚РµРіРѕСЂРёСЏ`);
+            console.warn(`У упражнения "${name}" не указана категория`);
         }
 
         if (!exercise.description) {
-            console.warn(`РЈ СѓРїСЂР°Р¶РЅРµРЅРёСЏ "${name}" РЅРµ СѓРєР°Р·Р°РЅРѕ РѕРїРёСЃР°РЅРёРµ`);
+            console.warn(`У упражнения "${name}" не указано описание`);
         }
 
         if (!exercise.image) {
-            console.warn(`РЈ СѓРїСЂР°Р¶РЅРµРЅРёСЏ "${name}" РЅРµ СѓРєР°Р·Р°РЅР° РєР°СЂС‚РёРЅРєР°`);
+            console.warn(`У упражнения "${name}" не указана картинка`);
         }
     });
 }

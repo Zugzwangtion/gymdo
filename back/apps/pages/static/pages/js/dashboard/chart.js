@@ -17,14 +17,14 @@
             labels: sortedWorkouts.map((workout) => workout.date),
             datasets: [
                 {
-                    label: "РўРѕРЅРЅР°Р¶",
+                    label: "Тоннаж",
                     data: sortedWorkouts.map((workout) => Number(workout.tonnage || 0)),
                     borderColor: "#4caf50",
                     tension: 0.3,
                     yAxisID: "yTonnage"
                 },
                 {
-                    label: "Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ (РјРёРЅ)",
+                    label: "Длительность (мин)",
                     data: sortedWorkouts.map((workout) => Number(workout.duration || 0)),
                     borderColor: "#ffeb3b",
                     tension: 0.3,
@@ -60,7 +60,7 @@
                     },
                     title: {
                         display: true,
-                        text: "РўРѕРЅРЅР°Р¶",
+                        text: "Тоннаж",
                         color: "#4caf50"
                     }
                 },
@@ -72,7 +72,7 @@
                     },
                     title: {
                         display: true,
-                        text: "РњРёРЅСѓС‚С‹",
+                        text: "Минуты",
                         color: "#ffeb3b"
                     },
                     grid: {

@@ -60,7 +60,7 @@ function buildMuscleLoadMap() {
                 const muscleKey = normalizeMuscleKey(rawMuscleKey);
 
                 if (!muscleSvgMap[muscleKey]) {
-                    console.warn(`РќРµС‚ muscleSvgMap РґР»СЏ РєР»СЋС‡Р°: ${muscleKey}`);
+                    console.warn(`Нет muscleSvgMap для ключа: ${muscleKey}`);
                     return;
                 }
 
@@ -110,7 +110,7 @@ function renderLegend(loadMap) {
         .slice(0, 5);
 
     if (!items.length) {
-        elements.muscleLegend.innerHTML = `<span class="muscle-legend-item">РџРѕРєР° РЅРµС‚ РґР°РЅРЅС‹С… Р·Р° 7 РґРЅРµР№</span>`;
+        elements.muscleLegend.innerHTML = `<span class="muscle-legend-item">Пока нет данных за 7 дней</span>`;
         return;
     }
 
@@ -148,7 +148,7 @@ async function loadSvgIntoContainer(container, fileName) {
     try {
         const response = await fetch(fileName);
         if (!response.ok) {
-            throw new Error(`РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ ${fileName}`);
+            throw new Error(`Не удалось загрузить ${fileName}`);
         }
 
         const svgText = await response.text();
@@ -157,7 +157,7 @@ async function loadSvgIntoContainer(container, fileName) {
         return container.querySelector("svg");
     } catch (error) {
         console.error(error);
-        container.innerHTML = `<p style="color:#f66;">РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё SVG</p>`;
+        container.innerHTML = `<p style="color:#f66;">Ошибка загрузки SVG</p>`;
         return null;
     }
 }

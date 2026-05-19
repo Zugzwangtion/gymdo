@@ -7,9 +7,9 @@ function createExerciseModal() {
     modalElement.className = "exercise-modal";
     modalElement.innerHTML = `
         <div class="modal-content">
-            <button class="modal-close" type="button">вњ–</button>
+            <button class="modal-close" type="button">✖</button>
             <h2 id="modalExerciseTitle"></h2>
-            <img id="modalExerciseImage" src="" alt="РЈРїСЂР°Р¶РЅРµРЅРёРµ">
+            <img id="modalExerciseImage" src="" alt="Упражнение">
             <p id="modalExerciseDescription"></p>
         </div>
     `;
@@ -25,7 +25,7 @@ function closeModal() {
 function openExerciseModal(exerciseName) {
     const details = getExerciseByNameSafe(exerciseName) || {};
     const image = details.image || "/static/pages/images/placeholder.jpg";
-    const description = details.description || "РћРїРёСЃР°РЅРёРµ РїРѕРєР° РЅРµ РґРѕР±Р°РІР»РµРЅРѕ";
+    const description = details.description || "Описание пока не добавлено";
 
     document.getElementById("modalExerciseTitle").textContent = exerciseName;
     document.getElementById("modalExerciseImage").src = image;
