@@ -1,0 +1,17 @@
+services:
+  web:
+    build:
+      context: ./back
+    container_name: gymdo-web
+    environment:
+      DJANGO_SECRET_KEY: unsafe-docker-dev-key
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: "127.0.0.1,localhost,0.0.0.0"
+      SQLITE_NAME: /data/db.sqlite3
+    ports:
+      - "8000:8000"
+    volumes:
+      - gymdo_sqlite_data:/data
+
+volumes:
+  gymdo_sqlite_data:

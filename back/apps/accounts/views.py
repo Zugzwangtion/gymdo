@@ -1,6 +1,9 @@
+from functools import wraps
+
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.middleware.csrf import CsrfViewMiddleware
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -12,6 +15,21 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 def csrf_view(request):
     # Перед POST-запросами JavaScript просит Django выдать CSRF-cookie.
     return JsonResponse({"detail": "CSRF cookie set"})
+
+def enforce_csrf(view_func):
+    @wraps(view_func)
+    def wrapped_view(request, *args, **kwargs):
+        middleware = CsrfViewMiddleware(lambda req: None)
+        middleware.process_request(request)
+        failure_response = middleware.process_view(request, lambda req: None, args, kwargs)
+
+        if failure_response:
+            return failure_response
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapped_view
+
 
 User = get_user_model()
 
@@ -35,6 +53,7 @@ def me_view(request):
     })
 
 
+@enforce_csrf
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def register_view(request):
@@ -78,6 +97,7 @@ def register_view(request):
     })
 
 
+@enforce_csrf
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def login_view(request):
@@ -111,6 +131,7 @@ def login_view(request):
     })
 
 
+@enforce_csrf
 @api_view(["POST"])
 def logout_view(request):
     # Удаляем данные пользователя из текущей сессии браузера.

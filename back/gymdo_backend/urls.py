@@ -8,5 +8,4 @@ urlpatterns = [
     # API, с которым общается JavaScript на страницах.
     path('api/auth/', include('apps.accounts.urls')),
     path('api/workouts/', include('apps.workouts.urls')),
-    path('api/support/', include('apps.support.urls')),
 ]

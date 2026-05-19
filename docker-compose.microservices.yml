@@ -1,0 +1,53 @@
+services:
+  gateway:
+    image: nginx:1.27-alpine
+    container_name: gymdo-gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./services/gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth-service
+      - workout-service
+      - frontend-service
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+    container_name: gymdo-auth-service
+    environment:
+      DJANGO_SECRET_KEY: microservices-dev-secret
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: "127.0.0.1,localhost,auth-service,gateway"
+      SQLITE_NAME: /data/auth.sqlite3
+      TOKEN_SIGNING_SALT: gymdo-auth-token
+      AUTH_TOKEN_SECRET: gymdo-shared-auth-token-secret
+    volumes:
+      - gymdo_auth_data:/data
+
+  workout-service:
+    build:
+      context: ./services/workout-service
+    container_name: gymdo-workout-service
+    environment:
+      DJANGO_SECRET_KEY: microservices-dev-secret
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: "127.0.0.1,localhost,workout-service,gateway"
+      SQLITE_NAME: /data/workouts.sqlite3
+      TOKEN_SIGNING_SALT: gymdo-auth-token
+      AUTH_TOKEN_SECRET: gymdo-shared-auth-token-secret
+    volumes:
+      - gymdo_workout_data:/data
+
+  frontend-service:
+    build:
+      context: ./services/frontend-service
+    container_name: gymdo-frontend-service
+    environment:
+      DJANGO_SECRET_KEY: microservices-dev-secret
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: "127.0.0.1,localhost,frontend-service,gateway"
+
+volumes:
+  gymdo_auth_data:
+  gymdo_workout_data:

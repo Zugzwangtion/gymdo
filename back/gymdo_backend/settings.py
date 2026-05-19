@@ -21,7 +21,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'apps.accounts',
     'apps.workouts',
-    'apps.support',
     'apps.pages',
 ]
 
@@ -59,7 +58,7 @@ DATABASES = {
     'default': {
         # Для учебного проекта SQLite удобен: база хранится в одном файле db.sqlite3.
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': os.getenv('SQLITE_NAME', BASE_DIR / 'db.sqlite3'),
     }
 }
 
@@ -92,7 +91,6 @@ CSRF_COOKIE_SAMESITE = "Lax"
 
 # Настройки Telegram можно оставить пустыми, если Telegram-функции не используются.
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
-TELEGRAM_SUPPORT_CHAT_ID = os.getenv('TELEGRAM_SUPPORT_CHAT_ID', '')
 TELEGRAM_LOGIN_BOT_USERNAME = os.getenv('TELEGRAM_LOGIN_BOT_USERNAME', '')
 
 LOGIN_URL = '/login/'

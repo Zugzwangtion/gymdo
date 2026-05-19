@@ -136,6 +136,12 @@ async function getExerciseReactions() {
     return apiFetch("/api/workouts/exercise-reactions/");
 }
 
+function createExerciseReactionsStream() {
+    return new EventSource(`${API_BASE}/api/workouts/exercise-reactions/stream/`, {
+        withCredentials: true
+    });
+}
+
 async function voteExerciseReaction(exerciseName, value) {
     return apiFetch("/api/workouts/exercise-reactions/vote/", {
         method: "POST",

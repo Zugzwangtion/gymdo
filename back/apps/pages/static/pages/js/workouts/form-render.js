@@ -1,0 +1,587 @@
+﻿function getDelta(current, previous) {
+    const a = Number(current || 0);
+    const b = Number(previous || 0);
+    if (!Number.isFinite(a) || !Number.isFinite(b) || !a || !b) return null;
+    const delta = Number((a - b).toFixed(2));
+    return delta === 0 ? null : delta;
+}
+
+function createDeltaBadge(delta) {
+    if (delta == null) return document.createTextNode("");
+    const badge = document.createElement("span");
+    badge.className = `set-delta ${delta > 0 ? "positive" : "negative"}`;
+    badge.textContent = `${delta > 0 ? "+" : ""}${formatNumber(delta)}`;
+    return badge;
+}
+
+function getEffortConfig(value) {
+    return effortOptions.find((option) => option.value === value) || effortOptions[0];
+}
+
+function updateEmptyState() {
+    if (elements.emptyExercisesState) {
+        elements.emptyExercisesState.style.display = state.exercises.length > 0 ? "none" : "flex";
+    }
+}
+
+function openExercisePicker() {
+    if (!elements.exercisePickerModal) return;
+    renderExercisePicker();
+    elements.exercisePickerModal.style.display = "flex";
+}
+
+function closeExercisePicker() {
+    if (elements.exercisePickerModal) {
+        elements.exercisePickerModal.style.display = "none";
+    }
+}
+
+function toggleCategory(categoryName) {
+    if (state.expandedCategories.has(categoryName)) {
+        state.expandedCategories.delete(categoryName);
+    } else {
+        state.expandedCategories.add(categoryName);
+    }
+    renderExercisePicker();
+}
+
+function createCategoryBlock(categoryName, exercises) {
+    const groupBlock = document.createElement("div");
+    groupBlock.className = "picker-group-card";
+
+    const isOpen = state.expandedCategories.has(categoryName);
+    const headerBtn = document.createElement("button");
+    headerBtn.type = "button";
+    headerBtn.className = `picker-group-toggle${isOpen ? " open" : ""}`;
+
+    const groupName = document.createElement("span");
+    groupName.textContent = categoryName;
+
+    const arrow = document.createElement("span");
+    arrow.className = "picker-group-arrow";
+    arrow.textContent = "вЊ„";
+
+    headerBtn.append(groupName, arrow);
+    headerBtn.addEventListener("click", () => toggleCategory(categoryName));
+
+    const exercisesList = document.createElement("div");
+    exercisesList.className = "picker-exercises-list";
+    exercisesList.style.display = isOpen ? "block" : "none";
+
+    exercises.slice().sort((a, b) => a.localeCompare(b, "ru")).forEach((exerciseName) => {
+        const exerciseBtn = document.createElement("button");
+        exerciseBtn.type = "button";
+        exerciseBtn.className = "picker-exercise-btn";
+        exerciseBtn.textContent = exerciseName;
+        exerciseBtn.addEventListener("click", () => {
+            addExercise(exerciseName);
+            closeExercisePicker();
+        });
+        exercisesList.appendChild(exerciseBtn);
+    });
+
+    groupBlock.append(headerBtn, exercisesList);
+    return groupBlock;
+}
+
+function renderExercisePicker() {
+    if (!elements.exercisePickerBody || !elements.pickerTitle || !elements.pickerSubtitle) return;
+
+    elements.pickerTitle.textContent = "Р’С‹Р±РµСЂРё РіСЂСѓРїРїСѓ РјС‹С€С†";
+    elements.pickerSubtitle.textContent = "РќР°Р¶РјРё РЅР° РєР°С‚РµРіРѕСЂРёСЋ, С‡С‚РѕР±С‹ СЂР°СЃРєСЂС‹С‚СЊ СѓРїСЂР°Р¶РЅРµРЅРёСЏ.";
+    elements.exercisePickerBody.innerHTML = "";
+
+    Object.entries(getExercisesGroupedSafe())
+        .sort(([a], [b]) => a.localeCompare(b, "ru"))
+        .forEach(([categoryName, exercises]) => {
+            elements.exercisePickerBody.appendChild(createCategoryBlock(categoryName, exercises));
+        });
+}
+
+function createDefaultSet(values = {}) {
+    return {
+        id: generateId(),
+        reps: values.reps ?? "",
+        weight: values.weight ?? "",
+        effort: values.effort ?? ""
+    };
+}
+
+function createSetsFromPrevious(previous) {
+    const previousSets = previous?.exercise?.sets || [];
+    if (!previousSets.length) return [createDefaultSet()];
+    return previousSets.map(() => createDefaultSet());
+}
+
+function addExercise(exerciseName) {
+    const exerciseData = getExerciseByNameSafe(exerciseName);
+    const previous = getPreviousExercise(exerciseName);
+
+    state.exercises.push({
+        id: generateId(),
+        name: exerciseName,
+        category: exerciseData?.category || "РЈРїСЂР°Р¶РЅРµРЅРёРµ",
+        image: exerciseData?.image || "",
+        previous,
+        sets: createSetsFromPrevious(previous)
+    });
+
+    renderExercises();
+}
+
+function removeExercise(exerciseId) {
+    state.exercises = state.exercises.filter((exercise) => exercise.id !== exerciseId);
+    renderExercises();
+}
+
+function addSet(exerciseId) {
+    const exercise = state.exercises.find((item) => item.id === exerciseId);
+    if (!exercise) return;
+    exercise.sets.push(createDefaultSet());
+    renderExercises();
+}
+
+function removeSet(exerciseId, setId) {
+    const exercise = state.exercises.find((item) => item.id === exerciseId);
+    if (!exercise) return;
+
+    if (exercise.sets.length === 1) {
+        exercise.sets = [createDefaultSet()];
+    } else {
+        exercise.sets = exercise.sets.filter((set) => set.id !== setId);
+    }
+
+    renderExercises();
+}
+
+function updateSetValue(exerciseId, setId, field, value) {
+    const exercise = state.exercises.find((item) => item.id === exerciseId);
+    const set = exercise?.sets.find((item) => item.id === setId);
+    if (!set) return;
+    set[field] = value;
+}
+
+function oldCreateValueCell(currentValue, previousValue, delta) {
+    const cell = document.createElement("div");
+    cell.className = currentValue === "" || currentValue == null ? "set-value muted" : "set-value";
+
+    const main = document.createElement("span");
+    main.textContent = currentValue === "" || currentValue == null
+        ? formatNumber(previousValue || 0)
+        : formatNumber(currentValue);
+
+    cell.append(main, createDeltaBadge(delta));
+    return cell;
+}
+
+function oldOpenSetEditor(exerciseId, setId) {
+    const exercise = state.exercises.find((item) => item.id === exerciseId);
+    const setIndex = exercise?.sets.findIndex((item) => item.id === setId) ?? -1;
+    if (!exercise || setIndex < 0) return;
+
+    state.editing = { exerciseId, setId };
+    renderSetEditor(exercise, exercise.sets[setIndex], setIndex);
+}
+
+function stepSetValue(exerciseId, setId, field, delta) {
+    const exercise = state.exercises.find((item) => item.id === exerciseId);
+    const set = exercise?.sets.find((item) => item.id === setId);
+    if (!set) return;
+
+    const current = Number(set[field] || 0);
+    const nextValue = Math.max(0, Number((current + delta).toFixed(2)));
+    set[field] = nextValue === 0 ? "" : String(nextValue);
+    renderExercises();
+}
+
+function createInlineStepper(exercise, set, field, previousValue, step) {
+    const wrap = document.createElement("div");
+    wrap.className = "inline-set-stepper";
+
+    const minus = document.createElement("button");
+    minus.type = "button";
+    minus.className = "inline-step-button";
+    minus.textContent = "-";
+    minus.addEventListener("click", () => stepSetValue(exercise.id, set.id, field, -step));
+
+    const inputWrap = document.createElement("label");
+    inputWrap.className = set[field] === "" || set[field] == null ? "inline-set-value muted" : "inline-set-value";
+
+    const input = document.createElement("input");
+    input.type = "number";
+    input.min = "0";
+    input.step = String(step);
+    input.value = set[field];
+    input.placeholder = previousValue ? formatNumber(previousValue) : "0";
+    input.addEventListener("input", (event) => {
+        updateSetValue(exercise.id, set.id, field, event.target.value);
+        inputWrap.classList.toggle("muted", !event.target.value);
+    });
+    input.addEventListener("change", renderExercises);
+
+    const plus = document.createElement("button");
+    plus.type = "button";
+    plus.className = "inline-step-button";
+    plus.textContent = "+";
+    plus.addEventListener("click", () => stepSetValue(exercise.id, set.id, field, step));
+
+    inputWrap.append(minus, input, createDeltaBadge(getDelta(set[field], previousValue)), plus);
+    wrap.append(inputWrap);
+    return wrap;
+}
+
+function createSetBadge(set, index) {
+    const effort = getEffortConfig(set.effort);
+    const badge = document.createElement("div");
+    badge.className = "set-badge";
+    badge.textContent = String(index + 1);
+    badge.title = effort.label;
+    return badge;
+}
+
+function createEffortStrip(exercise, set) {
+    const strip = document.createElement("div");
+    strip.className = "effort-strip";
+
+    effortOptions.slice(1).forEach((option) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `effort-strip-segment effort-${option.tone}${set.effort === option.value ? " active" : ""}`;
+        button.title = option.label;
+        button.setAttribute("aria-label", option.label);
+        button.addEventListener("click", () => {
+            updateSetValue(exercise.id, set.id, "effort", set.effort === option.value ? "" : option.value);
+            renderExercises();
+        });
+        strip.appendChild(button);
+    });
+
+    return strip;
+}
+
+function createSetRow(exercise, set, index) {
+    const previousSet = getPreviousSet(exercise, index);
+    const row = document.createElement("div");
+    row.className = `set-row live-set-row${set.completedAt ? " completed" : ""}`;
+
+    const badge = createSetBadge(set, index);
+    const weightCell = createInlineStepper(exercise, set, "weight", previousSet?.weight, 0.5);
+    const repsCell = createInlineStepper(exercise, set, "reps", previousSet?.reps, 1);
+    const effortStrip = createEffortStrip(exercise, set);
+
+    const setActions = document.createElement("div");
+    setActions.className = "set-row-actions";
+
+    const doneButton = document.createElement("button");
+    doneButton.type = "button";
+    doneButton.className = "finish-set-button";
+    doneButton.textContent = "вњ“";
+    doneButton.title = "Р—Р°РІРµСЂС€РёС‚СЊ РїРѕРґС…РѕРґ";
+    doneButton.addEventListener("click", () => finishSet(exercise.id, set.id));
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "remove-set-inline";
+    editButton.textContent = "Г—";
+    editButton.title = "РЈРґР°Р»РёС‚СЊ РїРѕРґС…РѕРґ";
+    editButton.addEventListener("click", () => removeSet(exercise.id, set.id));
+
+    if (state.mode === "execution") {
+        setActions.append(doneButton);
+    }
+    setActions.append(editButton);
+    row.append(badge, weightCell, repsCell, setActions, effortStrip);
+    return row;
+}
+
+function calculateExerciseStats(exercise) {
+    const sets = exercise.sets.filter((set) => Number(set.weight || 0) > 0 || Number(set.reps || 0) > 0);
+    const tonnage = sets.reduce((sum, set) => sum + Number(set.weight || 0) * Number(set.reps || 0), 0);
+    const reps = sets.reduce((sum, set) => sum + Number(set.reps || 0), 0);
+    const previousSets = exercise.previous?.exercise?.sets || [];
+    const previousTonnage = previousSets.reduce((sum, set) => sum + Number(set.weight || 0) * Number(set.reps || 0), 0);
+
+    return { sets: sets.length, totalSets: exercise.sets.length, tonnage, reps, previousTonnage };
+}
+
+function createExerciseCard(exercise) {
+    const card = document.createElement("div");
+    card.className = "exercise-card tracking-exercise-card";
+
+    const header = document.createElement("div");
+    header.className = "tracking-exercise-header";
+
+    const image = document.createElement("div");
+    image.className = "exercise-thumb";
+    if (exercise.image) image.style.backgroundImage = `url("${exercise.image}")`;
+
+    const titleWrap = document.createElement("div");
+    titleWrap.className = "tracking-title-wrap";
+
+    const title = document.createElement("h3");
+    title.textContent = exercise.name;
+
+    const subtitle = document.createElement("p");
+    subtitle.textContent = exercise.previous?.workout?.date
+        ? `РџСЂРµРґС‹РґСѓС‰Р°СЏ: ${exercise.previous.workout.date}`
+        : "Р Р°РЅСЊС€Рµ РЅРµ РІС‹РїРѕР»РЅСЏР»РѕСЃСЊ";
+
+    titleWrap.append(title, subtitle);
+
+    const removeExerciseButton = document.createElement("button");
+    removeExerciseButton.type = "button";
+    removeExerciseButton.className = "remove-exercise-button compact";
+    removeExerciseButton.textContent = "в‹®";
+    removeExerciseButton.title = "РЈРґР°Р»РёС‚СЊ СѓРїСЂР°Р¶РЅРµРЅРёРµ";
+    removeExerciseButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        removeExercise(exercise.id);
+    });
+
+    header.append(image, titleWrap, removeExerciseButton);
+
+    if (exercise.isCollapsed) {
+        card.classList.add("collapsed-exercise-card");
+        header.addEventListener("click", () => reopenExercise(exercise.id));
+        card.append(header);
+        return card;
+    }
+
+    const setsTitle = document.createElement("div");
+    setsTitle.className = "sets-title";
+    setsTitle.textContent = "РџРѕРґС…РѕРґС‹";
+
+    const setsHeader = document.createElement("div");
+    setsHeader.className = "setsHeader tracking-sets-header";
+    setsHeader.innerHTML = `
+        <span>в„–</span>
+        <span>Р’РµСЃ, РєРі</span>
+        <span>РџРѕРІС‚РѕСЂРµРЅРёСЏ</span>
+        <span></span>
+    `;
+
+    const setsContainer = document.createElement("div");
+    setsContainer.className = "setsContainer tracking-sets-container";
+    exercise.sets.forEach((set, index) => {
+        setsContainer.appendChild(createSetRow(exercise, set, index));
+    });
+
+    const stats = calculateExerciseStats(exercise);
+    const statsBlock = document.createElement("div");
+    statsBlock.className = "exercise-live-stats";
+    statsBlock.innerHTML = `
+        <span>${formatWeight(stats.tonnage / 1000)} С‚ вЂў ${stats.sets} / ${stats.totalSets} вЂў ${stats.reps}</span>
+        <span class="${stats.previousTonnage ? "muted-red" : ""}">${stats.previousTonnage ? `${formatWeight(stats.previousTonnage / 1000)} С‚ РїСЂРµРґ.` : "РЅРµС‚ РёСЃС‚РѕСЂРёРё"}</span>
+    `;
+
+    const actions = document.createElement("div");
+    actions.className = "tracking-actions";
+
+    const finishExerciseButton = document.createElement("button");
+    finishExerciseButton.type = "button";
+    finishExerciseButton.className = "finish-exercise-button";
+    finishExerciseButton.textContent = "Р—Р°РІРµСЂС€РёС‚СЊ СѓРїСЂР°Р¶РЅРµРЅРёРµ";
+    finishExerciseButton.addEventListener("click", () => finishExercise(exercise.id));
+
+    const addSetButton = document.createElement("button");
+    addSetButton.type = "button";
+    addSetButton.className = "add-set-button compact-add-set";
+    addSetButton.textContent = "+";
+    addSetButton.title = "Р”РѕР±Р°РІРёС‚СЊ РїРѕРґС…РѕРґ";
+    addSetButton.addEventListener("click", () => addSet(exercise.id));
+
+    if (state.mode === "execution") {
+        actions.append(finishExerciseButton);
+    }
+    actions.append(addSetButton);
+    card.append(header, setsTitle, setsHeader, setsContainer, statsBlock, actions);
+    return card;
+}
+
+function renderExercises() {
+    if (!elements.exercisesContainer) return;
+    elements.exercisesContainer.innerHTML = "";
+    state.exercises.forEach((exercise) => {
+        elements.exercisesContainer.appendChild(createExerciseCard(exercise));
+    });
+    updateEmptyState();
+}
+
+function createEditorIfNeeded() {
+    let editor = document.getElementById("setEditorModal");
+    if (editor) return editor;
+
+    editor = document.createElement("div");
+    editor.id = "setEditorModal";
+    editor.className = "set-editor-modal";
+    document.body.appendChild(editor);
+    return editor;
+}
+
+function closeSetEditor() {
+    const editor = document.getElementById("setEditorModal");
+    if (editor) editor.style.display = "none";
+    state.editing = null;
+}
+
+function stepNumber(value, delta, min = 0) {
+    const current = Number(value || 0);
+    return Math.max(min, Number((current + delta).toFixed(2)));
+}
+
+function renderSetEditor(exercise, set, index) {
+    const previousSet = getPreviousSet(exercise, index);
+    const editor = createEditorIfNeeded();
+    editor.innerHTML = "";
+    editor.style.display = "flex";
+
+    const panel = document.createElement("div");
+    panel.className = "set-editor-panel";
+
+    const header = document.createElement("div");
+    header.className = "set-editor-header";
+
+    const titleBlock = document.createElement("div");
+    const title = document.createElement("h2");
+    title.textContent = `РџРѕРґС…РѕРґ ${index + 1}`;
+    const subtitle = document.createElement("p");
+    subtitle.textContent = exercise.name;
+    titleBlock.append(title, subtitle);
+
+    const doneButton = document.createElement("button");
+    doneButton.type = "button";
+    doneButton.className = "set-editor-done";
+    doneButton.textContent = "вњ“";
+    doneButton.addEventListener("click", closeSetEditor);
+    header.append(titleBlock, doneButton);
+
+    const makeStepper = (label, field, step, fullText = "") => {
+        const section = document.createElement("section");
+        section.className = "set-editor-section";
+
+        const sectionLabel = document.createElement("div");
+        sectionLabel.className = "set-editor-label";
+        sectionLabel.textContent = label;
+
+        const controls = document.createElement("div");
+        controls.className = "stepper";
+
+        const minus = document.createElement("button");
+        minus.type = "button";
+        minus.textContent = "в€’";
+
+        const value = document.createElement("input");
+        value.type = "number";
+        value.min = "0";
+        value.step = String(step);
+        value.value = set[field] || "";
+        value.placeholder = previousSet?.[field] ? formatNumber(previousSet[field]) : "0";
+
+        const plus = document.createElement("button");
+        plus.type = "button";
+        plus.textContent = "+";
+
+        const sync = (newValue) => {
+            updateSetValue(exercise.id, set.id, field, newValue === "" ? "" : String(newValue));
+            renderExercises();
+            renderSetEditor(exercise, set, index);
+        };
+
+        minus.addEventListener("click", () => sync(stepNumber(set[field], -step)));
+        plus.addEventListener("click", () => sync(stepNumber(set[field], step)));
+        value.addEventListener("input", (event) => {
+            updateSetValue(exercise.id, set.id, field, event.target.value);
+            renderExercises();
+        });
+
+        controls.append(minus, value, plus);
+        section.append(sectionLabel, controls);
+
+        if (fullText) {
+            const hint = document.createElement("p");
+            hint.className = "set-editor-hint";
+            hint.textContent = fullText;
+            section.appendChild(hint);
+        }
+
+        return section;
+    };
+
+    const effortSection = document.createElement("section");
+    effortSection.className = "set-editor-section";
+
+    const effortLabel = document.createElement("div");
+    effortLabel.className = "set-editor-label";
+    effortLabel.textContent = "РЈСЃРёР»РёРµ";
+
+    const effortGrid = document.createElement("div");
+    effortGrid.className = "effort-grid";
+    effortOptions.slice(1).forEach((option) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `effort-choice effort-${option.tone}${set.effort === option.value ? " active" : ""}`;
+        button.textContent = option.label;
+        button.addEventListener("click", () => {
+            updateSetValue(exercise.id, set.id, "effort", option.value);
+            renderExercises();
+            renderSetEditor(exercise, set, index);
+        });
+        effortGrid.appendChild(button);
+    });
+    effortSection.append(effortLabel, effortGrid);
+
+    const stats = document.createElement("section");
+    stats.className = "set-editor-section editor-stats";
+    const tonnage = Number(set.weight || 0) * Number(set.reps || 0);
+    stats.innerHTML = `<strong>РЎС‚Р°С‚РёСЃС‚РёРєР°</strong><span>РўРѕРЅРЅР°Р¶: ${formatWeight(tonnage / 1000)} С‚</span>`;
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "editor-remove-set";
+    removeButton.textContent = "РЈРґР°Р»РёС‚СЊ РїРѕРґС…РѕРґ";
+    removeButton.addEventListener("click", () => {
+        removeSet(exercise.id, set.id);
+        closeSetEditor();
+    });
+
+    panel.append(
+        header,
+        makeStepper("Р’РµСЃ, РєРі", "weight", 0.5, previousSet?.weight ? `РџСЂРѕС€Р»С‹Р№ РІРµСЃ: ${formatWeight(previousSet.weight)} РєРі` : ""),
+        makeStepper("РџРѕРІС‚РѕСЂРµРЅРёСЏ", "reps", 1, previousSet?.reps ? `РџСЂРѕС€Р»С‹Рµ РїРѕРІС‚РѕСЂС‹: ${formatNumber(previousSet.reps)}` : ""),
+        effortSection,
+        stats,
+        removeButton
+    );
+
+    editor.appendChild(panel);
+    editor.addEventListener("click", (event) => {
+        if (event.target === editor) closeSetEditor();
+    }, { once: true });
+}
+
+async function handleSubmit(event) {
+    event.preventDefault();
+    if (!validateWorkoutForm()) return;
+
+    const exercises = collectExercisesPayload();
+    const payload = {
+        date: elements.dateInput.value,
+        duration: getWorkoutDurationMinutes(),
+        tonnage: calculateTonnage(exercises),
+        exercises
+    };
+
+    try {
+        if (state.mode === "execution") {
+            stopExecutionTimer();
+        }
+        await createWorkout(payload);
+        alert("РўСЂРµРЅРёСЂРѕРІРєР° СЃРѕС…СЂР°РЅРµРЅР°");
+        window.location.href = "/";
+    } catch (error) {
+        if (state.mode === "execution") {
+            startExecutionTimer();
+        }
+        alert(error.message || "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ С‚СЂРµРЅРёСЂРѕРІРєРё");
+    }
+}

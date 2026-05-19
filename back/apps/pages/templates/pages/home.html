@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Дневник тренировок</title>
-    <link rel="stylesheet" href="{% static 'pages/style.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/guide.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/workout-form.css' %}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
@@ -143,8 +148,15 @@
         </div>
     </section>
 
-    <script src="{% static 'pages/api.js' %}"></script>
+    <script src="{% static 'pages/js/api.js' %}"></script>
     <script src="{% static 'pages/exercises.js' %}"></script>
-    <script src="{% static 'pages/script.js' %}"></script>
+    <script src="{% static 'pages/js/shared/format.js' %}"></script>
+    <script src="{% static 'pages/js/shared/dom.js' %}"></script>
+    <script src="{% static 'pages/js/dashboard/state.js' %}"></script>
+    <script src="{% static 'pages/js/dashboard/calendar.js' %}"></script>
+    <script src="{% static 'pages/js/dashboard/stats.js' %}"></script>
+    <script src="{% static 'pages/js/dashboard/chart.js' %}"></script>
+    <script src="{% static 'pages/js/dashboard/muscle-map.js' %}"></script>
+    <script src="{% static 'pages/js/dashboard/main.js' %}"></script>
 </body>
 </html>

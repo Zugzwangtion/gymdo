@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Добавить тренировку</title>
-    <link rel="stylesheet" href="{% static 'pages/style.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/guide.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/workout-form.css' %}">
 </head>
 <body class="add-page-body">
 
@@ -32,12 +37,26 @@
             </div>
 
             <div class="form-grid">
+                <div class="field-group form-grid-full">
+                    <span class="field-label">Режим</span>
+                    <div class="mode-toggle" role="radiogroup" aria-label="Режим добавления тренировки">
+                        <label class="mode-option">
+                            <input type="radio" name="workoutMode" value="manual" checked>
+                            <span>Внесение</span>
+                        </label>
+                        <label class="mode-option">
+                            <input type="radio" name="workoutMode" value="execution">
+                            <span>Выполнение</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="field-group">
                     <label for="date">Дата</label>
                     <input type="date" id="date" required>
                 </div>
 
-                <div class="field-group">
+                <div class="field-group" id="manualDurationGroup">
                     <label for="duration">Длительность (мин)</label>
                     <input
                         type="number"
@@ -47,6 +66,27 @@
                         required
                         placeholder="Например: 75">
                     <small class="field-hint">Обычно тренировка занимает от 40 до 90 минут.</small>
+                </div>
+
+                <div class="field-group timer-panel hidden" id="executionTimerPanel">
+                    <span class="field-label">Таймер тренировки</span>
+                    <div class="workout-timer-labels" aria-hidden="true">
+                        <span>Всего</span>
+                        <span>После упражнения</span>
+                        <span>Отдых</span>
+                    </div>
+                    <div class="workout-timer-grid">
+                        <div class="workout-timer-cell">
+                            <strong id="totalTimerDisplay">00:00:00</strong>
+                        </div>
+                        <div class="workout-timer-cell">
+                            <strong id="exerciseTimerDisplay">00:00:00</strong>
+                        </div>
+                        <div class="workout-timer-cell">
+                            <strong id="restTimerDisplay">00:00:00</strong>
+                        </div>
+                    </div>
+                    <small class="field-hint">Таймер остановится после завершения тренировки.</small>
                 </div>
             </div>
         </section>
@@ -73,7 +113,7 @@
 
         <div class="form-actions">
             <button type="button" class="ghost-button" onclick="goBack()">Назад</button>
-            <button type="submit" class="primary-button">Сохранить тренировку</button>
+            <button type="submit" class="primary-button" id="submitWorkoutButton">Сохранить тренировку</button>
         </div>
     </form>
 </main>
@@ -92,8 +132,13 @@
     </div>
 </div>
 
-<script src="{% static 'pages/api.js' %}"></script>
+<script src="{% static 'pages/js/api.js' %}"></script>
 <script src="{% static 'pages/exercises.js' %}"></script>
-<script src="{% static 'pages/add.js' %}"></script>
+<script src="{% static 'pages/js/shared/format.js' %}"></script>
+<script src="{% static 'pages/js/workouts/form-state.js' %}"></script>
+<script src="{% static 'pages/js/workouts/previous-workouts.js' %}"></script>
+<script src="{% static 'pages/js/workouts/timers.js' %}"></script>
+<script src="{% static 'pages/js/workouts/form-render.js' %}"></script>
+<script src="{% static 'pages/js/workouts/form-submit.js' %}"></script>
 </body>
 </html>

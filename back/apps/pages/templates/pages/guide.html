@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Справочник упражнений</title>
-    <link rel="stylesheet" href="{% static 'pages/style.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/guide.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/workout-form.css' %}">
 </head>
 <body>
 
@@ -31,8 +36,11 @@
 
     <div id="guideContainer" class="guide-container"></div>
 
-    <script src="{% static 'pages/api.js' %}"></script>
+    <script src="{% static 'pages/js/api.js' %}?v=20260515-reactions"></script>
     <script src="{% static 'pages/exercises.js' %}"></script>
-    <script src="{% static 'pages/guide.js' %}"></script>
+    <script src="{% static 'pages/js/shared/user-menu.js' %}"></script>
+    <script src="{% static 'pages/js/guide/modal.js' %}?v=20260515-reactions"></script>
+    <script src="{% static 'pages/js/guide/reactions.js' %}?v=20260515-reactions"></script>
+    <script src="{% static 'pages/js/guide/guide-render.js' %}?v=20260515-reactions"></script>
 </body>
 </html>
