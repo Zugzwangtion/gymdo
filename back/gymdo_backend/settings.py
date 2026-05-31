@@ -1,14 +1,46 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from urllib.parse import parse_qsl, urlparse
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
+
+def split_env_list(name, default=''):
+    return [value.strip() for value in os.getenv(name, default).split(',') if value.strip()]
+
+
+def database_from_url(url):
+    parsed = urlparse(url)
+
+    if parsed.scheme in ('postgres', 'postgresql'):
+        return {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': parsed.path.lstrip('/'),
+            'USER': parsed.username or '',
+            'PASSWORD': parsed.password or '',
+            'HOST': parsed.hostname or '',
+            'PORT': parsed.port or '',
+            'OPTIONS': dict(parse_qsl(parsed.query)),
+        }
+
+    if parsed.scheme == 'sqlite':
+        return {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': parsed.path,
+        }
+
+    raise ValueError(f'Unsupported DATABASE_URL scheme: {parsed.scheme}')
+
 # Основные настройки берутся из .env, чтобы секреты не хранить прямо в коде.
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'unsafe-dev-key')
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true'
-ALLOWED_HOSTS = [host.strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if host.strip()]
+ALLOWED_HOSTS = split_env_list('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost')
+
+render_external_hostname = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+if render_external_hostname and render_external_hostname not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_external_hostname)
 
 # Список Django-приложений: системные модули, библиотеки и наши apps/*.
 INSTALLED_APPS = [
@@ -55,13 +87,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gymdo_backend.wsgi.application'
 ASGI_APPLICATION = 'gymdo_backend.asgi.application'
 
-DATABASES = {
-    'default': {
-        # Для учебного проекта SQLite удобен: база хранится в одном файле db.sqlite3.
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.getenv('SQLITE_NAME', BASE_DIR / 'db.sqlite3'),
+database_url = os.getenv('DATABASE_URL')
+if database_url:
+    DATABASES = {'default': database_from_url(database_url)}
+else:
+    DATABASES = {
+        'default': {
+            # Для учебного проекта SQLite удобен: база хранится в одном файле db.sqlite3.
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.getenv('SQLITE_NAME', BASE_DIR / 'db.sqlite3'),
+        }
     }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -89,6 +125,16 @@ REST_FRAMEWORK = {
 
 SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CSRF_TRUSTED_ORIGINS = split_env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
+for host in ALLOWED_HOSTS:
+    if host not in ('127.0.0.1', 'localhost') and not host.startswith('.'):
+        origin = f'https://{host}'
+        if origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin)
 
 # Настройки Telegram можно оставить пустыми, если Telegram-функции не используются.
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
