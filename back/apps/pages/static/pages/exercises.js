@@ -3,7 +3,7 @@ const exercisesDatabase = {
         category: "Грудь",
         primaryMuscles: ["chest"],
         secondaryMuscles: [],
-        image: "/static/pages/images/bench-press.jpg",
+        image: "/static/pages/images/barbell-bench-press.png",
         description: "Базовое упражнение для развития грудных мышц.",
     },
 
@@ -11,7 +11,7 @@ const exercisesDatabase = {
         category: "Грудь",
         primaryMuscles: ["chest"],
         secondaryMuscles: [],
-        image: "/static/pages/images/bench-press.jpg",
+        image: "/static/pages/images/dumbbell-chest-press.png",
         description: "Базовое упражнение для развития грудных мышц.",
     },
 
@@ -19,7 +19,7 @@ const exercisesDatabase = {
         category: "Грудь",
         primaryMuscles: ["chest"],
         secondaryMuscles: [],
-        image: "/static/pages/images/bench-press.jpg",
+        image: "/static/pages/images/incline-barbell-bench-press.png",
         description: "Базовое упражнение для развития грудных мышц.",
     },
 
@@ -27,7 +27,7 @@ const exercisesDatabase = {
         category: "Грудь",
         primaryMuscles: ["chest"],
         secondaryMuscles: [],
-        image: "/static/pages/images/bench-press.jpg",
+        image: "/static/pages/images/incline-dumbbell-bench-press.png",
         description: "Базовое упражнение для развития грудных мышц.",
     },
 
@@ -39,7 +39,7 @@ const exercisesDatabase = {
         category: "Спина",
         primaryMuscles: ["lats"],
         secondaryMuscles: [],
-        image: "/static/pages/images/bench-press.jpg",
+        image: "/static/pages/images/vertical-thrust-hummer.png",
         description: "Упражнение для широчайших мышц спины.",
     },
 
@@ -47,7 +47,7 @@ const exercisesDatabase = {
         category: "Спина",
         primaryMuscles: ["mid-back"],
         secondaryMuscles: [],
-        image: "/static/pages/images/bench-press.jpg",
+        image: "/static/pages/images/horizontal-thrust-hummer.png",
         description: "Упражнение для мышц серидины спины.",
     },
 
@@ -55,7 +55,7 @@ const exercisesDatabase = {
         category: "Спина",
         primaryMuscles: ["lats"],
         secondaryMuscles: [],
-        image: "/static/pages/images/bench-press.jpg",
+        image: "/static/pages/images/lat-pulldown.png",
         description: "Упражнение для широчайших мышц спины.",
     },
 
@@ -63,7 +63,7 @@ const exercisesDatabase = {
         category: "Спина",
         primaryMuscles: ["mid-back"],
         secondaryMuscles: [],
-        image: "/static/pages/images/bench-press.jpg",
+        image: "/static/pages/images/seated-cable-row.png",
         description: "Упражнение для мышц серидины спины.",
     },
 
@@ -71,7 +71,7 @@ const exercisesDatabase = {
         category: "Спина",
         primaryMuscles: ["lats"],
         secondaryMuscles: [],
-        image: "/static/pages/images/pull-ups.jpg",
+        image: "/static/pages/images/pull-ups.png",
         description: "Упражнение для широчайших мышц спины.",
     },
 
@@ -84,7 +84,7 @@ const exercisesDatabase = {
         category: "Плечи",
         primaryMuscles: ["shoulders"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/seated-dumbell-shoulder-press.png",
         description: "Базовое упражнение на плечи.",
     },
 
@@ -92,7 +92,7 @@ const exercisesDatabase = {
         category: "Плечи",
         primaryMuscles: ["shoulders"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/military-press.png",
         description: "Базовое упражнение на плечи.",
     },
 
@@ -100,7 +100,7 @@ const exercisesDatabase = {
         category: "Плечи",
         primaryMuscles: ["shoulders"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/dumbbell-lateral-raise.png",
         description: "Базовое упражнение на плечи.",
     },
 
@@ -111,14 +111,14 @@ const exercisesDatabase = {
         category: "Бицепсы",
         primaryMuscles: ["biceps"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/ez-bar-bicep-curl.png",
         description: "Базовое упражнение на бицепс.",
     },
     "Подъем гентелей на бицепс": {
         category: "Бицепсы",
         primaryMuscles: ["biceps"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/dumbbell-bicep-curl.png",
         description: "Базовое упражнение на бицепс.",
     },
 
@@ -127,14 +127,14 @@ const exercisesDatabase = {
         category: "Трицепсы",
         primaryMuscles: ["triceps"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/french-bench-press.png",
         description: "Базовое упражнение на трицепс.",
     },
     "Разгибание рук в кроссовере": {
         category: "Трицепсы",
         primaryMuscles: ["triceps"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/cable-triceps-pushdown.png",
         description: "Базовое упражнение на трицепс.",
     },
 
@@ -143,28 +143,28 @@ const exercisesDatabase = {
         category: "Квадрицкпсы",
         primaryMuscles: ["quads"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/leg-press.png",
         description: "Базовое упражнение на ноги.",
     },
     "Разгибание ног в тренажере": {
         category: "Квадрицкпсы",
         primaryMuscles: ["quads"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/leg-extension.png",
         description: "Базовое упражнение на ноги.",
     },
     "Сгибание ног в тренажере сидя": {
         category: "Бицепсы бедра",
         primaryMuscles: ["hamstrings"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/bending-legs-sitting-machine.jpg",
         description: "Базовое упражнение на ноги.",
     },
     "Сгибание ног в тренажере лежа": {
         category: "Бицепсы бедра",
         primaryMuscles: ["hamstrings"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/lying-leg-curl.png",
         description: "Базовое упражнение на ноги.",
     },
 
@@ -174,7 +174,7 @@ const exercisesDatabase = {
         category: "Икры",
         primaryMuscles: ["calves"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/machine-calf-paise.png",
         description: "Базовое упражнение на ноги.",
     },
 
@@ -183,7 +183,7 @@ const exercisesDatabase = {
         category: "Пресс",
         primaryMuscles: ["abs"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/crunch.png",
         description: "Базовое упражнение на укрепление мышц кора.",
     },
 
@@ -191,7 +191,7 @@ const exercisesDatabase = {
         category: "Пресс",
         primaryMuscles: ["abs"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/decline-bench-crunch.png",
         description: "Базовое упражнение на укрепление мышц кора.",
     },
 
@@ -199,7 +199,7 @@ const exercisesDatabase = {
         category: "Пресс",
         primaryMuscles: ["abs"],
         secondaryMuscles: [],
-        image: "/static/pages/images/seated-dumbbell-press.jpg",
+        image: "/static/pages/images/crunch.png",
         description: "Базовое упражнение на укрепление мышц кора.",
     },
 };
