@@ -14,10 +14,6 @@ function createDeltaBadge(delta) {
     return badge;
 }
 
-function getEffortConfig(value) {
-    return effortOptions.find((option) => option.value === value) || effortOptions[0];
-}
-
 function updateEmptyState() {
     if (elements.emptyExercisesState) {
         elements.emptyExercisesState.style.display = state.exercises.length > 0 ? "none" : "flex";
@@ -102,8 +98,7 @@ function createDefaultSet(values = {}) {
     return {
         id: generateId(),
         reps: values.reps ?? "",
-        weight: values.weight ?? "",
-        effort: values.effort ?? ""
+        weight: values.weight ?? ""
     };
 }
 
@@ -111,6 +106,34 @@ function createSetsFromPrevious(previous) {
     const previousSets = previous?.exercise?.sets || [];
     if (!previousSets.length) return [createDefaultSet()];
     return previousSets.map(() => createDefaultSet());
+}
+
+function getReusableSetValues(exercise) {
+    const filledCurrentSets = exercise.sets.filter((set) => {
+        return set.weight !== "" || set.reps !== "";
+    });
+    const lastCurrentSet = filledCurrentSets[filledCurrentSets.length - 1];
+
+    if (lastCurrentSet) {
+        return {
+            weight: lastCurrentSet.weight,
+            reps: lastCurrentSet.reps
+        };
+    }
+
+    const previousSets = exercise.previous?.exercise?.sets || [];
+    const sameIndexPreviousSet = previousSets[exercise.sets.length];
+    const lastPreviousSet = previousSets[previousSets.length - 1];
+    const source = sameIndexPreviousSet || lastPreviousSet;
+
+    if (!source) {
+        return {};
+    }
+
+    return {
+        weight: source.weight ?? "",
+        reps: source.reps ?? ""
+    };
 }
 
 function addExercise(exerciseName) {
@@ -137,7 +160,7 @@ function removeExercise(exerciseId) {
 function addSet(exerciseId) {
     const exercise = state.exercises.find((item) => item.id === exerciseId);
     if (!exercise) return;
-    exercise.sets.push(createDefaultSet());
+    exercise.sets.push(createDefaultSet(getReusableSetValues(exercise)));
     renderExercises();
 }
 
@@ -231,32 +254,10 @@ function createInlineStepper(exercise, set, field, previousValue, step) {
 }
 
 function createSetBadge(set, index) {
-    const effort = getEffortConfig(set.effort);
     const badge = document.createElement("div");
     badge.className = "set-badge";
     badge.textContent = String(index + 1);
-    badge.title = effort.label;
     return badge;
-}
-
-function createEffortStrip(exercise, set) {
-    const strip = document.createElement("div");
-    strip.className = "effort-strip";
-
-    effortOptions.slice(1).forEach((option) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `effort-strip-segment effort-${option.tone}${set.effort === option.value ? " active" : ""}`;
-        button.title = option.label;
-        button.setAttribute("aria-label", option.label);
-        button.addEventListener("click", () => {
-            updateSetValue(exercise.id, set.id, "effort", set.effort === option.value ? "" : option.value);
-            renderExercises();
-        });
-        strip.appendChild(button);
-    });
-
-    return strip;
 }
 
 function createSetRow(exercise, set, index) {
@@ -267,7 +268,6 @@ function createSetRow(exercise, set, index) {
     const badge = createSetBadge(set, index);
     const weightCell = createInlineStepper(exercise, set, "weight", previousSet?.weight, 0.5);
     const repsCell = createInlineStepper(exercise, set, "reps", previousSet?.reps, 1);
-    const effortStrip = createEffortStrip(exercise, set);
 
     const setActions = document.createElement("div");
     setActions.className = "set-row-actions";
@@ -290,7 +290,7 @@ function createSetRow(exercise, set, index) {
         setActions.append(doneButton);
     }
     setActions.append(editButton);
-    row.append(badge, weightCell, repsCell, setActions, effortStrip);
+    row.append(badge, weightCell, repsCell, setActions);
     return row;
 }
 
@@ -507,29 +507,6 @@ function renderSetEditor(exercise, set, index) {
         return section;
     };
 
-    const effortSection = document.createElement("section");
-    effortSection.className = "set-editor-section";
-
-    const effortLabel = document.createElement("div");
-    effortLabel.className = "set-editor-label";
-    effortLabel.textContent = "Усилие";
-
-    const effortGrid = document.createElement("div");
-    effortGrid.className = "effort-grid";
-    effortOptions.slice(1).forEach((option) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = `effort-choice effort-${option.tone}${set.effort === option.value ? " active" : ""}`;
-        button.textContent = option.label;
-        button.addEventListener("click", () => {
-            updateSetValue(exercise.id, set.id, "effort", option.value);
-            renderExercises();
-            renderSetEditor(exercise, set, index);
-        });
-        effortGrid.appendChild(button);
-    });
-    effortSection.append(effortLabel, effortGrid);
-
     const stats = document.createElement("section");
     stats.className = "set-editor-section editor-stats";
     const tonnage = Number(set.weight || 0) * Number(set.reps || 0);
@@ -548,7 +525,6 @@ function renderSetEditor(exercise, set, index) {
         header,
         makeStepper("Вес, кг", "weight", 0.5, previousSet?.weight ? `Прошлый вес: ${formatWeight(previousSet.weight)} кг` : ""),
         makeStepper("Повторения", "reps", 1, previousSet?.reps ? `Прошлые повторы: ${formatNumber(previousSet.reps)}` : ""),
-        effortSection,
         stats,
         removeButton
     );

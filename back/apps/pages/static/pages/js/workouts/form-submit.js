@@ -11,7 +11,6 @@ function collectExercisesPayload() {
                 .map((set, index) => ({
                     reps: normalizeSetValue(set.reps),
                     weight: normalizeSetValue(set.weight),
-                    effort: set.effort || "",
                     sort_order: index
                 }))
                 .filter((set) => set.reps > 0 || set.weight > 0);

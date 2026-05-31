@@ -1,0 +1,44 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тренировка</title>
+    <link rel="stylesheet" href="{% static 'pages/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/layout.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/workout-detail.css' %}?v=20260530-2">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="{% url 'pages:home' %}" class="logo">GymDo</a>
+            <a href="{% url 'pages:guide' %}" class="nav-link">Справочник</a>
+        </div>
+    </nav>
+
+    <main class="workout-detail-page" data-workout-id="{{ workout_id }}">
+        <header class="workout-detail-header">
+            <a class="back-link" href="{% url 'pages:home' %}">← К календарю</a>
+            <p class="workout-detail-kicker">Просмотр тренировки</p>
+            <h1 id="workoutTitle">Тренировка</h1>
+            <div class="workout-detail-stats">
+                <span id="workoutDuration">Длительность: 0 мин</span>
+                <span id="workoutTonnage">Тоннаж: 0 т</span>
+            </div>
+        </header>
+
+        <section id="workoutContent" class="workout-detail-content">
+            <p class="workout-detail-muted">Загрузка...</p>
+        </section>
+
+        <div class="workout-detail-actions">
+            <button id="deleteWorkoutBtn" type="button" class="danger-btn">Удалить тренировку</button>
+        </div>
+    </main>
+
+    <script src="{% static 'pages/js/api.js' %}?v=20260530"></script>
+    <script src="{% static 'pages/js/shared/format.js' %}?v=20260530-2"></script>
+    <script src="{% static 'pages/js/workout-detail.js' %}?v=20260530-3"></script>
+</body>
+</html>

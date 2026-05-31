@@ -7,3 +7,7 @@
 function formatWeight(value) {
     return formatNumber(value);
 }
+
+function formatTonnage(value) {
+    return `${formatNumber(Number(value || 0) / 1000)} т`;
+}

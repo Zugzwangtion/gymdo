@@ -6,7 +6,7 @@
     <title>Дневник тренировок</title>
     <link rel="stylesheet" href="{% static 'pages/css/base.css' %}">
     <link rel="stylesheet" href="{% static 'pages/css/layout.css' %}">
-    <link rel="stylesheet" href="{% static 'pages/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'pages/css/dashboard.css' %}?v=20260530">
     <link rel="stylesheet" href="{% static 'pages/css/guide.css' %}">
     <link rel="stylesheet" href="{% static 'pages/css/components.css' %}">
     <link rel="stylesheet" href="{% static 'pages/css/workout-form.css' %}">
@@ -98,7 +98,7 @@
         <p>Упражнений: <span id="totalExercises">0</span></p>
         <p>Подходов: <span id="totalSets">0</span></p>
         <p>Повторений: <span id="totalReps">0</span></p>
-        <p>Общий тоннаж: <span id="totalTonnage">0</span></p>
+        <p>Общий тоннаж: <span id="totalTonnage">0 т</span></p>
     </div>
 
     <div class="chart-card">
@@ -150,13 +150,13 @@
 
     <script src="{% static 'pages/js/api.js' %}"></script>
     <script src="{% static 'pages/exercises.js' %}"></script>
-    <script src="{% static 'pages/js/shared/format.js' %}"></script>
+    <script src="{% static 'pages/js/shared/format.js' %}?v=20260530-2"></script>
     <script src="{% static 'pages/js/shared/dom.js' %}"></script>
     <script src="{% static 'pages/js/dashboard/state.js' %}"></script>
-    <script src="{% static 'pages/js/dashboard/calendar.js' %}"></script>
-    <script src="{% static 'pages/js/dashboard/stats.js' %}"></script>
-    <script src="{% static 'pages/js/dashboard/chart.js' %}"></script>
-    <script src="{% static 'pages/js/dashboard/muscle-map.js' %}"></script>
+    <script src="{% static 'pages/js/dashboard/calendar.js' %}?v=20260530-4"></script>
+    <script src="{% static 'pages/js/dashboard/stats.js' %}?v=20260530-2"></script>
+    <script src="{% static 'pages/js/dashboard/chart.js' %}?v=20260530-2"></script>
+    <script src="{% static 'pages/js/dashboard/muscle-map.js' %}?v=20260530-3"></script>
     <script src="{% static 'pages/js/dashboard/main.js' %}"></script>
 </body>
 </html>

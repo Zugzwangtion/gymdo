@@ -17,8 +17,8 @@
             labels: sortedWorkouts.map((workout) => workout.date),
             datasets: [
                 {
-                    label: "Тоннаж",
-                    data: sortedWorkouts.map((workout) => Number(workout.tonnage || 0)),
+                    label: "Тоннаж, т",
+                    data: sortedWorkouts.map((workout) => Number(workout.tonnage || 0) / 1000),
                     borderColor: "#4caf50",
                     tension: 0.3,
                     yAxisID: "yTonnage"
@@ -60,7 +60,7 @@
                     },
                     title: {
                         display: true,
-                        text: "Тоннаж",
+                        text: "Тоннаж, т",
                         color: "#4caf50"
                     }
                 },

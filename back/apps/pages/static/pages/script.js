@@ -34,6 +34,12 @@ const elements = {
     muscleLegend: document.getElementById("muscleLegend"),
 };
 
+function formatNumber(value) {
+    const number = Number(value || 0);
+    if (!Number.isFinite(number)) return "0";
+    return Number.isInteger(number) ? String(number) : String(Number(number.toFixed(2)));
+}
+
 const exerciseMuscleMap = {
     "Жим штанги лежа": ["chest", "front-shoulders", "triceps"],
     "Жим гантелей лежа": ["chest", "front-shoulders", "triceps"],
@@ -287,7 +293,7 @@ function showWorkoutDetails(workout) {
     elements.modalContent.append(
         title,
         createInfoParagraph(`Длительность: ${workout.duration ?? 0} мин`),
-        createInfoParagraph(`Тоннаж: ${workout.tonnage ?? 0}`)
+        createInfoParagraph(`Тоннаж: ${formatNumber(Number(workout.tonnage || 0) / 1000)} т`)
     );
 
     (workout.exercises || []).forEach((exercise) => {
@@ -338,7 +344,7 @@ function showDayWorkouts(dateString, dayWorkouts) {
                 textContent: `Тренировка ${index + 1}`
             }),
             createInfoParagraph(`Длительность: ${workout.duration ?? 0} мин`),
-            createInfoParagraph(`Тоннаж: ${workout.tonnage ?? 0}`),
+            createInfoParagraph(`Тоннаж: ${formatNumber(Number(workout.tonnage || 0) / 1000)} т`),
             openButton
         );
 
@@ -389,7 +395,7 @@ function updateStats() {
     if (elements.totalExercises) elements.totalExercises.textContent = String(stats.totalExercises);
     if (elements.totalSets) elements.totalSets.textContent = String(stats.totalSets);
     if (elements.totalReps) elements.totalReps.textContent = String(stats.totalReps);
-    if (elements.totalTonnage) elements.totalTonnage.textContent = String(stats.totalTonnage);
+    if (elements.totalTonnage) elements.totalTonnage.textContent = `${formatNumber(stats.totalTonnage / 1000)} т`;
 }
 
 function renderChart() {
@@ -411,8 +417,8 @@ function renderChart() {
             labels: sortedWorkouts.map((workout) => workout.date),
             datasets: [
                 {
-                    label: "Тоннаж",
-                    data: sortedWorkouts.map((workout) => Number(workout.tonnage || 0)),
+                    label: "Тоннаж, т",
+                    data: sortedWorkouts.map((workout) => Number(workout.tonnage || 0) / 1000),
                     borderColor: "#4caf50",
                     tension: 0.3,
                     yAxisID: "yTonnage"
@@ -454,7 +460,7 @@ function renderChart() {
                     },
                     title: {
                         display: true,
-                        text: "Тоннаж",
+                        text: "Тоннаж, т",
                         color: "#4caf50"
                     }
                 },
@@ -642,9 +648,9 @@ function calculateSetLoad(set) {
 
 function normalizeMuscleKey(muscleKey) {
     const aliases = {
-        "midback": "mid-back",
-        "mid-back": "mid-back",
-        "middle-back": "mid-back",
+        "midback": "upperBack",
+        "mid-back": "upperBack",
+        "middle-back": "upperBack",
         "upper-back": "upperBack",
         "lower-back": "lowerBack"
     };
@@ -695,19 +701,8 @@ function tryActivateSvgIds(svg, ids, className) {
 
     ids.forEach((id) => {
         const safeId = String(id).trim();
-        const escaped = CSS.escape(safeId);
-
-        const candidates = [
-            `#${escaped}`,
-            `[id="${safeId}"]`,
-            `[id="${safeId} "]`
-        ];
-
-        let el = null;
-        for (const selector of candidates) {
-            el = svg.querySelector(selector);
-            if (el) break;
-        }
+        const el = Array.from(svg.querySelectorAll("[id]"))
+            .find((candidate) => candidate.id === id || candidate.id.trim() === safeId);
 
         if (el) {
             el.classList.add(className);
@@ -717,22 +712,7 @@ function tryActivateSvgIds(svg, ids, className) {
 
 function renderLegend(loadMap) {
     if (!elements.muscleLegend) return;
-
-    const items = Object.entries(loadMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-
-    if (!items.length) {
-        elements.muscleLegend.innerHTML = `<span class="muscle-legend-item">Пока нет данных за 7 дней</span>`;
-        return;
-    }
-
-    elements.muscleLegend.innerHTML = items
-        .map(([muscleKey, value]) => {
-            const label = muscleSvgMap[muscleKey]?.label || muscleKey;
-            return `<span class="muscle-legend-item">${label}: ${Math.round(value)}</span>`;
-        })
-        .join("");
+    elements.muscleLegend.innerHTML = "";
 }
 
 function applyMuscleLoadToSvg(frontSvg, backSvg, loadMap) {

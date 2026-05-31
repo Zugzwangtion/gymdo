@@ -18,5 +18,9 @@ def add_workout_page_view(request):
     return render(request, 'pages/add.html')
 
 
+def workout_detail_page_view(request, workout_id):
+    return render(request, 'pages/workout_detail.html', {'workout_id': workout_id})
+
+
 def guide_page_view(request):
     return render(request, 'pages/guide.html')

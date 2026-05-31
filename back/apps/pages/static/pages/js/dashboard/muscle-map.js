@@ -29,9 +29,9 @@ function calculateSetLoad(set) {
 
 function normalizeMuscleKey(muscleKey) {
     const aliases = {
-        "midback": "mid-back",
-        "mid-back": "mid-back",
-        "middle-back": "mid-back",
+        "midback": "upperBack",
+        "mid-back": "upperBack",
+        "middle-back": "upperBack",
         "upper-back": "upperBack",
         "lower-back": "lowerBack"
     };
@@ -82,19 +82,8 @@ function tryActivateSvgIds(svg, ids, className) {
 
     ids.forEach((id) => {
         const safeId = String(id).trim();
-        const escaped = CSS.escape(safeId);
-
-        const candidates = [
-            `#${escaped}`,
-            `[id="${safeId}"]`,
-            `[id="${safeId} "]`
-        ];
-
-        let el = null;
-        for (const selector of candidates) {
-            el = svg.querySelector(selector);
-            if (el) break;
-        }
+        const el = Array.from(svg.querySelectorAll("[id]"))
+            .find((candidate) => candidate.id === id || candidate.id.trim() === safeId);
 
         if (el) {
             el.classList.add(className);
@@ -104,22 +93,7 @@ function tryActivateSvgIds(svg, ids, className) {
 
 function renderLegend(loadMap) {
     if (!elements.muscleLegend) return;
-
-    const items = Object.entries(loadMap)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-
-    if (!items.length) {
-        elements.muscleLegend.innerHTML = `<span class="muscle-legend-item">Пока нет данных за 7 дней</span>`;
-        return;
-    }
-
-    elements.muscleLegend.innerHTML = items
-        .map(([muscleKey, value]) => {
-            const label = muscleSvgMap[muscleKey]?.label || muscleKey;
-            return `<span class="muscle-legend-item">${label}: ${Math.round(value)}</span>`;
-        })
-        .join("");
+    elements.muscleLegend.innerHTML = "";
 }
 
 function applyMuscleLoadToSvg(frontSvg, backSvg, loadMap) {

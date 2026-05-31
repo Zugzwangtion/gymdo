@@ -119,6 +119,10 @@ async function getWorkouts() {
     return apiFetch("/api/workouts/");
 }
 
+async function getWorkoutById(id) {
+    return apiFetch(`/api/workouts/${id}/`);
+}
+
 async function createWorkout(payload) {
     return apiFetch("/api/workouts/", {
         method: "POST",

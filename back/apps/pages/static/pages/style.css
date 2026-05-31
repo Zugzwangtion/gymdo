@@ -2392,13 +2392,14 @@ input::placeholder {
     display: block;
 }
 .muscle-map-container svg [id] {
-    fill: #e7e7e7;
+    fill: #e7e7e7 !important;
     opacity: 0.9;
     transition: fill 0.2s ease, opacity 0.2s ease;
 }
 
-.muscle-map-active {
+.muscle-map-container svg .muscle-map-active {
     fill: #ff4b4b !important;
+    opacity: 1;
 }
 
 

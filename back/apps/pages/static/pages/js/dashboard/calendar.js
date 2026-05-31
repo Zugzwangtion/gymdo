@@ -39,6 +39,11 @@ function goToAddPage(date = "") {
     location.href = date ? `/add/?date=${date}` : "/add/";
 }
 
+function goToWorkoutPage(workoutId) {
+    if (!workoutId) return;
+    location.href = `/workouts/${workoutId}/`;
+}
+
 function getDayWorkouts(dateString) {
     return state.workouts.filter((workout) => workout.date === dateString);
 }
@@ -67,7 +72,12 @@ function createCalendarDay(day, dateString, dayWorkouts) {
             return;
         }
 
-        if (dayWorkouts.length > 0) {
+        if (dayWorkouts.length === 1) {
+            goToWorkoutPage(dayWorkouts[0].id);
+            return;
+        }
+
+        if (dayWorkouts.length > 1) {
             showDayWorkouts(dateString, dayWorkouts);
             return;
         }
@@ -126,14 +136,14 @@ function showDayWorkouts(dateString, dayWorkouts) {
         const openButton = document.createElement("button");
         openButton.type = "button";
         openButton.textContent = "Открыть";
-        openButton.addEventListener("click", () => showWorkoutDetails(workout));
+        openButton.addEventListener("click", () => goToWorkoutPage(workout.id));
 
         card.append(
             Object.assign(document.createElement("h3"), {
                 textContent: `Тренировка ${index + 1}`
             }),
             createInfoParagraph(`Длительность: ${workout.duration ?? 0} мин`),
-            createInfoParagraph(`Тоннаж: ${workout.tonnage ?? 0}`),
+            createInfoParagraph(`Тоннаж: ${formatTonnage(workout.tonnage)}`),
             openButton
         );
 
@@ -147,6 +157,51 @@ function showDayWorkouts(dateString, dayWorkouts) {
     addButton.addEventListener("click", () => goToAddPage(dateString));
 
     elements.modalContent.appendChild(addButton);
+    openModal();
+}
+
+function showWorkoutDetails(workout) {
+    if (!elements.modalContent) {
+        return;
+    }
+
+    elements.modalContent.innerHTML = "";
+
+    const title = document.createElement("h2");
+    title.textContent = workout.date || "Без даты";
+
+    elements.modalContent.append(
+        title,
+        createInfoParagraph(`Длительность: ${workout.duration ?? 0} мин`),
+        createInfoParagraph(`Тоннаж: ${formatTonnage(workout.tonnage)}`)
+    );
+
+    const exercises = workout.exercises || [];
+
+    if (!exercises.length) {
+        elements.modalContent.appendChild(createInfoParagraph("В этой тренировке пока нет упражнений."));
+    }
+
+    exercises.forEach((exercise) => {
+        const exerciseTitle = document.createElement("h3");
+        exerciseTitle.textContent = exercise.name || "Без названия";
+        elements.modalContent.appendChild(exerciseTitle);
+
+        (exercise.sets || []).forEach((set, index) => {
+            const setDiv = document.createElement("div");
+            setDiv.className = "workout-set";
+            setDiv.textContent = `Подход ${index + 1}: ${set.weight ?? 0} кг × ${set.reps ?? 0}`;
+            elements.modalContent.appendChild(setDiv);
+        });
+    });
+
+    const spacer = document.createElement("br");
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Удалить тренировку";
+    deleteButton.addEventListener("click", () => deleteWorkout(workout.id, workout.date));
+
+    elements.modalContent.append(spacer, deleteButton);
     openModal();
 }
 

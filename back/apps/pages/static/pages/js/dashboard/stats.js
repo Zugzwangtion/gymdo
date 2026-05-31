@@ -32,6 +32,6 @@ function updateStats() {
     if (elements.totalExercises) elements.totalExercises.textContent = String(stats.totalExercises);
     if (elements.totalSets) elements.totalSets.textContent = String(stats.totalSets);
     if (elements.totalReps) elements.totalReps.textContent = String(stats.totalReps);
-    if (elements.totalTonnage) elements.totalTonnage.textContent = String(stats.totalTonnage);
+    if (elements.totalTonnage) elements.totalTonnage.textContent = formatTonnage(stats.totalTonnage);
 }
 
