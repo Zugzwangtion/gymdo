@@ -1,4 +1,9 @@
-﻿function bindUserMenu(userDropdown, profileLogoutBtn, userBadge) {
+/**
+ * bindUserMenu - общий helper, который нужен разным страницам.
+ * На вход получает: userDropdown, profileLogoutBtn, userBadge. Возвращает готовое значение или DOM-элемент, который можно использовать в любом модуле.
+ * Такие функции вынесены отдельно, чтобы форматирование и мелкие DOM-операции были одинаковыми во всем проекте.
+ */
+function bindUserMenu(userDropdown, profileLogoutBtn, userBadge) {
     if (userBadge && currentUser?.username) {
         userBadge.textContent = currentUser.username[0].toUpperCase();
 

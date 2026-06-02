@@ -5,9 +5,20 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
+    """Django management command для создания администратора из переменных окружения.
+
+    Запускается как `python manage.py ensure_admin`. Команда нужна для Docker
+    и учебного запуска: можно заранее задать ADMIN_USERNAME, ADMIN_EMAIL,
+    ADMIN_PASSWORD и получить готовый аккаунт администратора без ручного ввода.
+    """
     help = 'Create or update a superuser from ADMIN_* environment variables.'
 
     def handle(self, *args, **options):
+        """Читает ADMIN_* переменные, создает или обновляет superuser.
+
+        `get_or_create()` ищет пользователя по username. Если пользователь уже
+        есть, команда обновляет email, права администратора и пароль.
+        """
         username = os.getenv('ADMIN_USERNAME')
         email = os.getenv('ADMIN_EMAIL', '')
         password = os.getenv('ADMIN_PASSWORD')

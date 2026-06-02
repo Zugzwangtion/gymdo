@@ -1,7 +1,13 @@
-﻿function redirectToLogin() {
+/**
+ * Перенаправляет неавторизованного пользователя на страницу входа.
+ */
+function redirectToLogin() {
     window.location.href = "/login/";
 }
 
+/**
+ * Создает DOM-разметку модального окна упражнения и добавляет ее в body.
+ */
 function createExerciseModal() {
     const modalElement = document.createElement("div");
     modalElement.className = "exercise-modal";
@@ -18,10 +24,18 @@ function createExerciseModal() {
     return modalElement;
 }
 
+/**
+ * Скрывает модальное окно упражнения.
+ */
 function closeModal() {
     modal.style.display = "none";
 }
 
+/**
+ * Открывает карточку упражнения в справочнике.
+ * По названию упражнение ищется в `exercisesDatabase`, затем в модальное окно подставляются картинка и описание.
+ * Если данных нет, показываются безопасные запасные значения.
+ */
 function openExerciseModal(exerciseName) {
     const details = getExerciseByNameSafe(exerciseName) || {};
     const image = details.image || "/static/pages/images/placeholder.jpg";
@@ -35,6 +49,9 @@ function openExerciseModal(exerciseName) {
     modal.style.display = "flex";
 }
 
+/**
+ * Подключает закрытие модального окна по кнопке, клику по фону и Escape.
+ */
 function bindModalEvents() {
     modal.querySelector(".modal-close")?.addEventListener("click", closeModal);
 

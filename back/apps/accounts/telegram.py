@@ -11,10 +11,16 @@ from .models import TelegramProfile
 
 
 class TelegramAuthError(Exception):
+    """Ошибка авторизации через Telegram Login Widget."""
     pass
 
 
 def _secret_key() -> bytes:
+    """Готовит секретный ключ для проверки подписи Telegram.
+
+    Telegram требует использовать SHA256 от токена бота. Если токен не задан
+    в настройках, авторизация через Telegram считается неправильно настроенной.
+    """
     token = settings.TELEGRAM_BOT_TOKEN
     if not token:
         raise TelegramAuthError('TELEGRAM_BOT_TOKEN is not configured')
@@ -22,7 +28,13 @@ def _secret_key() -> bytes:
 
 
 def verify_telegram_widget_payload(payload: dict) -> dict:
-    """Проверяет, что данные действительно подписаны Telegram, а не подделаны."""
+    """Проверяет, что данные действительно подписаны Telegram, а не подделаны.
+
+    На вход получает словарь query-параметров от Telegram. Функция достает
+    `hash`, строит `data_check_string`, считает HMAC-SHA256 и сравнивает
+    подписи через `hmac.compare_digest()`. Дополнительно проверяет свежесть
+    `auth_date`, чтобы старые данные нельзя было переиспользовать.
+    """
     payload = {k: v for k, v in payload.items() if v not in (None, '')}
     their_hash = payload.pop('hash', None)
     if not their_hash:
@@ -45,7 +57,13 @@ def verify_telegram_widget_payload(payload: dict) -> dict:
 
 
 def get_or_create_user_from_telegram(payload: dict, request: HttpRequest):
-    """Находит пользователя по telegram_id или создает нового Django-пользователя."""
+    """Находит пользователя по telegram_id или создает нового Django-пользователя.
+
+    `payload` уже должен быть проверен через `verify_telegram_widget_payload()`.
+    Функция ищет `TelegramProfile`, при отсутствии создает User и профиль,
+    обновляет имя/фото из Telegram и вызывает `login(request, user)`, чтобы
+    создать обычную Django-сессию.
+    """
     User = get_user_model()
     telegram_id = int(payload['id'])
     username_base = payload.get('username') or f'tg_{telegram_id}'
@@ -79,10 +97,16 @@ def get_or_create_user_from_telegram(payload: dict, request: HttpRequest):
 
 
 def logout_telegram_user(request: HttpRequest):
+    """Выходит из Telegram-авторизации так же, как из обычной Django-сессии."""
     logout(request)
 
 
 def telegram_login_widget_script(origin: str) -> str:
+    """Собирает HTML script для Telegram Login Widget.
+
+    `origin` нужен, чтобы построить callback URL, куда Telegram вернет
+    подписанные данные пользователя после нажатия кнопки входа.
+    """
     bot_name = settings.TELEGRAM_LOGIN_BOT_USERNAME
     if not bot_name:
         raise TelegramAuthError('TELEGRAM_LOGIN_BOT_USERNAME is not configured')

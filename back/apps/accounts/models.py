@@ -3,6 +3,12 @@ from django.db import models
 
 
 class TelegramProfile(models.Model):
+    """Дополнительный профиль для пользователя, вошедшего через Telegram.
+
+    Основной пользователь все равно хранится в стандартной Django-модели User.
+    Эта модель связывает User с `telegram_id` и хранит данные, которые пришли
+    из Telegram Login Widget: username, имя, фамилию, фото и дату авторизации.
+    """
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='telegram_profile')
     telegram_id = models.BigIntegerField(unique=True)
     telegram_username = models.CharField(max_length=255, blank=True)
@@ -14,4 +20,5 @@ class TelegramProfile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
+        """Показывает связь Django-пользователя и Telegram id в админке."""
         return f'{self.user.username} ({self.telegram_id})'

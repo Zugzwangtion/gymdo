@@ -1,4 +1,9 @@
-﻿function getDelta(current, previous) {
+/**
+ * Считает разницу между текущим значением и прошлым значением.
+ * Используется для подсказок прогресса: например, если сейчас вес больше, чем в прошлой тренировке,
+ * рядом можно показать `+2.5`. Если сравнивать нечего или разницы нет, возвращается `null`.
+ */
+function getDelta(current, previous) {
     const a = Number(current || 0);
     const b = Number(previous || 0);
     if (!Number.isFinite(a) || !Number.isFinite(b) || !a || !b) return null;
@@ -6,6 +11,11 @@
     return delta === 0 ? null : delta;
 }
 
+/**
+ * Создает маленькую визуальную метку разницы с прошлой тренировкой.
+ * Положительная разница получает класс `positive`, отрицательная - `negative`.
+ * Если разницы нет, возвращается пустой текстовый узел, чтобы верстка не ломалась.
+ */
 function createDeltaBadge(delta) {
     if (delta == null) return document.createTextNode("");
     const badge = document.createElement("span");
@@ -14,24 +24,42 @@ function createDeltaBadge(delta) {
     return badge;
 }
 
+/**
+ * Показывает или скрывает пустое состояние списка упражнений.
+ * Если в `state.exercises` еще нет упражнений, пользователь видит блок-подсказку.
+ * Как только упражнение добавлено, этот блок скрывается.
+ */
 function updateEmptyState() {
     if (elements.emptyExercisesState) {
         elements.emptyExercisesState.style.display = state.exercises.length > 0 ? "none" : "flex";
     }
 }
 
+/**
+ * Открывает модальное окно выбора упражнения.
+ * Перед показом вызывает `renderExercisePicker()`, чтобы список категорий и упражнений был свежим.
+ */
 function openExercisePicker() {
     if (!elements.exercisePickerModal) return;
     renderExercisePicker();
     elements.exercisePickerModal.style.display = "flex";
 }
 
+/**
+ * Закрывает модальное окно выбора упражнения.
+ * Состояние выбранных упражнений при этом не меняется, скрывается только HTML-модалка.
+ */
 function closeExercisePicker() {
     if (elements.exercisePickerModal) {
         elements.exercisePickerModal.style.display = "none";
     }
 }
 
+/**
+ * Раскрывает или сворачивает категорию в окне выбора упражнения.
+ * Названия раскрытых категорий хранятся в `state.expandedCategories`, поэтому после перерисовки
+ * окно помнит, какие группы были открыты.
+ */
 function toggleCategory(categoryName) {
     if (state.expandedCategories.has(categoryName)) {
         state.expandedCategories.delete(categoryName);
@@ -41,6 +69,11 @@ function toggleCategory(categoryName) {
     renderExercisePicker();
 }
 
+/**
+ * Создает DOM-блок одной категории в выборе упражнения.
+ * Внутри есть кнопка-заголовок категории и список упражнений. Клик по упражнению вызывает
+ * `addExercise(exerciseName)`, после чего окно выбора закрывается.
+ */
 function createCategoryBlock(categoryName, exercises) {
     const groupBlock = document.createElement("div");
     groupBlock.className = "picker-group-card";
@@ -80,6 +113,11 @@ function createCategoryBlock(categoryName, exercises) {
     return groupBlock;
 }
 
+/**
+ * Перерисовывает содержимое модального окна выбора упражнения.
+ * Берет упражнения из справочника через `getExercisesGroupedSafe()`, сортирует категории
+ * и для каждой категории создает блок через `createCategoryBlock()`.
+ */
 function renderExercisePicker() {
     if (!elements.exercisePickerBody || !elements.pickerTitle || !elements.pickerSubtitle) return;
 
@@ -94,20 +132,41 @@ function renderExercisePicker() {
         });
 }
 
+/**
+ * Создает новый пустой подход для упражнения.
+ * Можно передать стартовые значения веса и повторов, например из прошлого подхода.
+ * Id создается временный, только для управления подходом на фронтенде.
+ */
 function createDefaultSet(values = {}) {
     return {
+        // id - временный id подхода только для фронтенда.
+        // В базе данных потом появится другой id, который создаст Django.
         id: generateId(),
+
+        // reps - количество повторений.
         reps: values.reps ?? "",
+
+        // weight - вес в килограммах.
         weight: values.weight ?? ""
     };
 }
 
+/**
+ * Создает стартовый список подходов для нового упражнения.
+ * Если такое упражнение уже выполнялось раньше, создается столько пустых подходов,
+ * сколько было в прошлый раз. Если истории нет, создается один пустой подход.
+ */
 function createSetsFromPrevious(previous) {
     const previousSets = previous?.exercise?.sets || [];
     if (!previousSets.length) return [createDefaultSet()];
     return previousSets.map(() => createDefaultSet());
 }
 
+/**
+ * Подбирает значения, которые можно подставить в новый подход.
+ * Сначала берет последний уже заполненный подход текущего упражнения. Если его нет,
+ * смотрит прошлую тренировку с этим упражнением и берет подход с тем же номером или последний прошлый подход.
+ */
 function getReusableSetValues(exercise) {
     const filledCurrentSets = exercise.sets.filter((set) => {
         return set.weight !== "" || set.reps !== "";
@@ -136,27 +195,54 @@ function getReusableSetValues(exercise) {
     };
 }
 
+/**
+ * Добавляет выбранное упражнение в текущее состояние формы.
+ * Название приходит из окна выбора, затем создается объект упражнения с временным `id` и стартовыми подходами.
+ * После изменения `state.exercises` вызывается перерисовка карточек.
+ */
 function addExercise(exerciseName) {
     const exerciseData = getExerciseByNameSafe(exerciseName);
     const previous = getPreviousExercise(exerciseName);
 
     state.exercises.push({
+        // id - временный id упражнения на странице.
         id: generateId(),
+
+        // name - название упражнения, например "Жим штанги лежа".
         name: exerciseName,
+
+        // category - группа/категория упражнения, например "Грудь".
         category: exerciseData?.category || "Упражнение",
+
+        // image - картинка упражнения из справочника.
         image: exerciseData?.image || "",
+
+        // previous - предыдущая тренировка с таким же упражнением.
+        // Нужна для подсказок "какой вес/повторы были в прошлый раз".
         previous,
+
+        // sets - подходы упражнения.
         sets: createSetsFromPrevious(previous)
     });
 
     renderExercises();
 }
 
+/**
+ * Удаляет упражнение из текущей формы.
+ * По временному `exerciseId` фильтрует `state.exercises`, оставляя все остальные упражнения,
+ * затем перерисовывает список карточек.
+ */
 function removeExercise(exerciseId) {
     state.exercises = state.exercises.filter((exercise) => exercise.id !== exerciseId);
     renderExercises();
 }
 
+/**
+ * Добавляет новый подход к конкретному упражнению.
+ * Упражнение ищется по `exerciseId`, а значения нового подхода по возможности копируются из предыдущего подхода или прошлой тренировки.
+ * Так пользователю не нужно каждый раз заново вводить похожие веса и повторы.
+ */
 function addSet(exerciseId) {
     const exercise = state.exercises.find((item) => item.id === exerciseId);
     if (!exercise) return;
@@ -164,6 +250,11 @@ function addSet(exerciseId) {
     renderExercises();
 }
 
+/**
+ * Удаляет подход из конкретного упражнения.
+ * Если подход был последним, вместо полного удаления создается новый пустой подход,
+ * чтобы карточка упражнения не осталась вообще без строк для ввода.
+ */
 function removeSet(exerciseId, setId) {
     const exercise = state.exercises.find((item) => item.id === exerciseId);
     if (!exercise) return;
@@ -177,6 +268,11 @@ function removeSet(exerciseId, setId) {
     renderExercises();
 }
 
+/**
+ * Обновляет одно поле подхода в `state.exercises`.
+ * По `exerciseId` и `setId` находится нужный подход, а `field` показывает, что меняем: вес, повторы или усилие.
+ * После изменения состояние снова отрисовывается на странице.
+ */
 function updateSetValue(exerciseId, setId, field, value) {
     const exercise = state.exercises.find((item) => item.id === exerciseId);
     const set = exercise?.sets.find((item) => item.id === setId);
@@ -184,6 +280,11 @@ function updateSetValue(exerciseId, setId, field, value) {
     set[field] = value;
 }
 
+/**
+ * Создает старый вариант ячейки значения подхода.
+ * Функция оставлена как вспомогательная/резервная: она показывает текущее значение,
+ * а если оно пустое, подставляет прошлое значение и рядом добавляет delta-бейдж.
+ */
 function oldCreateValueCell(currentValue, previousValue, delta) {
     const cell = document.createElement("div");
     cell.className = currentValue === "" || currentValue == null ? "set-value muted" : "set-value";
@@ -197,6 +298,11 @@ function oldCreateValueCell(currentValue, previousValue, delta) {
     return cell;
 }
 
+/**
+ * Открывает старый модальный редактор подхода.
+ * По id упражнения и подхода находит нужные данные в `state.exercises`,
+ * записывает их в `state.editing` и вызывает `renderSetEditor()`.
+ */
 function oldOpenSetEditor(exerciseId, setId) {
     const exercise = state.exercises.find((item) => item.id === exerciseId);
     const setIndex = exercise?.sets.findIndex((item) => item.id === setId) ?? -1;
@@ -206,6 +312,11 @@ function oldOpenSetEditor(exerciseId, setId) {
     renderSetEditor(exercise, exercise.sets[setIndex], setIndex);
 }
 
+/**
+ * Изменяет числовое поле подхода на шаг вверх или вниз.
+ * `field` выбирает, что меняем: `weight` или `reps`, а `delta` задает величину шага.
+ * После изменения карточки перерисовываются, чтобы новое значение сразу появилось в интерфейсе.
+ */
 function stepSetValue(exerciseId, setId, field, delta) {
     const exercise = state.exercises.find((item) => item.id === exerciseId);
     const set = exercise?.sets.find((item) => item.id === setId);
@@ -217,6 +328,11 @@ function stepSetValue(exerciseId, setId, field, delta) {
     renderExercises();
 }
 
+/**
+ * Создает компактный степпер прямо в строке подхода.
+ * Внутри есть кнопка минус, input, delta-подсказка и кнопка плюс.
+ * Любое изменение записывается обратно в `state.exercises` через `updateSetValue()` или `stepSetValue()`.
+ */
 function createInlineStepper(exercise, set, field, previousValue, step) {
     const wrap = document.createElement("div");
     wrap.className = "inline-set-stepper";
@@ -253,6 +369,10 @@ function createInlineStepper(exercise, set, field, previousValue, step) {
     return wrap;
 }
 
+/**
+ * Создает маленький номер подхода в строке упражнения.
+ * Номер берется из индекса подхода в массиве, поэтому первый подход отображается как `1`.
+ */
 function createSetBadge(set, index) {
     const badge = document.createElement("div");
     badge.className = "set-badge";
@@ -260,6 +380,11 @@ function createSetBadge(set, index) {
     return badge;
 }
 
+/**
+ * Создает строку одного подхода внутри карточки упражнения.
+ * Здесь появляются степперы веса/повторов, отметка выполнения и кнопки редактирования/удаления.
+ * Функция связывает визуальные кнопки с изменением данных через `updateSetValue()` и другие обработчики.
+ */
 function createSetRow(exercise, set, index) {
     const previousSet = getPreviousSet(exercise, index);
     const row = document.createElement("div");
@@ -294,6 +419,11 @@ function createSetRow(exercise, set, index) {
     return row;
 }
 
+/**
+ * Считает краткую статистику по одному упражнению.
+ * Возвращает количество заполненных подходов, общее количество подходов, тоннаж, повторы
+ * и тоннаж прошлого выполнения упражнения, чтобы карточка могла показать текущий прогресс.
+ */
 function calculateExerciseStats(exercise) {
     const sets = exercise.sets.filter((set) => Number(set.weight || 0) > 0 || Number(set.reps || 0) > 0);
     const tonnage = sets.reduce((sum, set) => sum + Number(set.weight || 0) * Number(set.reps || 0), 0);
@@ -304,6 +434,11 @@ function calculateExerciseStats(exercise) {
     return { sets: sets.length, totalSets: exercise.sets.length, tonnage, reps, previousTonnage };
 }
 
+/**
+ * Создает DOM-карточку одного упражнения.
+ * Внутри собираются заголовок, статистика, список подходов и кнопки управления.
+ * На вход приходит объект упражнения из `state.exercises`, поэтому карточка всегда отражает текущее состояние формы.
+ */
 function createExerciseCard(exercise) {
     const card = document.createElement("div");
     card.className = "exercise-card tracking-exercise-card";
@@ -398,6 +533,11 @@ function createExerciseCard(exercise) {
     return card;
 }
 
+/**
+ * Перерисовывает весь список упражнений на странице добавления.
+ * Берет данные из `state.exercises`, создает карточки через `createExerciseCard()` и вставляет их в контейнер.
+ * Это основной способ синхронизировать состояние JavaScript с тем, что видит пользователь.
+ */
 function renderExercises() {
     if (!elements.exercisesContainer) return;
     elements.exercisesContainer.innerHTML = "";
@@ -407,6 +547,11 @@ function renderExercises() {
     updateEmptyState();
 }
 
+/**
+ * Создает DOM-элемент модального редактора подхода, если его еще нет.
+ * Редактор добавляется в `document.body` один раз, а дальше переиспользуется,
+ * чтобы не создавать новую модалку при каждом открытии.
+ */
 function createEditorIfNeeded() {
     let editor = document.getElementById("setEditorModal");
     if (editor) return editor;
@@ -418,17 +563,32 @@ function createEditorIfNeeded() {
     return editor;
 }
 
+/**
+ * Закрывает модальный редактор подхода.
+ * Скрывает HTML-элемент редактора и очищает `state.editing`, чтобы приложение больше
+ * не считало какой-то подход открытым для редактирования.
+ */
 function closeSetEditor() {
     const editor = document.getElementById("setEditorModal");
     if (editor) editor.style.display = "none";
     state.editing = null;
 }
 
+/**
+ * Возвращает число после изменения на заданный шаг.
+ * Используется в модальном редакторе подхода для кнопок плюс/минус.
+ * Значение не может стать меньше `min`.
+ */
 function stepNumber(value, delta, min = 0) {
     const current = Number(value || 0);
     return Math.max(min, Number((current + delta).toFixed(2)));
 }
 
+/**
+ * Рисует модальный редактор одного подхода.
+ * Внутри создаются степперы веса и повторов, подсказки из прошлого подхода,
+ * текущая статистика подхода и кнопка удаления. Все изменения сразу пишутся в `state.exercises`.
+ */
 function renderSetEditor(exercise, set, index) {
     const previousSet = getPreviousSet(exercise, index);
     const editor = createEditorIfNeeded();
@@ -535,13 +695,26 @@ function renderSetEditor(exercise, set, index) {
     }, { once: true });
 }
 
+/**
+ * Главная функция сохранения тренировки.
+ * Она отменяет обычную отправку формы, проверяет поля, собирает payload, вызывает `createWorkout()` и после успеха возвращает пользователя на главную.
+ * Это точка, где данные из браузера впервые уходят на backend.
+ */
 async function handleSubmit(event) {
-    event.preventDefault();
-    if (!validateWorkoutForm()) return;
+    event.preventDefault();//останавливаем стандартную отправку формы
+    if (!validateWorkoutForm()) return; //проверяем что форма заполнена правильно
 
+    // берет внутреннее состояние формы и делает из него чистые данные для сервера.
     const exercises = collectExercisesPayload();
+    
+    //собираем тренировку в json 
+    // payload - итоговый объект тренировки, который отправляется в `createWorkout()`.
+    // date - дата тренировки.
+    // duration - длительность в минутах.
+    // tonnage - общий тоннаж: вес * повторы по всем подходам.
+    // exercises - упражнения с подходами.
     const payload = {
-        date: elements.dateInput.value,
+        date: elements.dateInput.value, //elements.dateInput это ссылка на HTML-поле даты. Она задана в form-state.js
         duration: getWorkoutDurationMinutes(),
         tonnage: calculateTonnage(exercises),
         exercises
@@ -549,11 +722,11 @@ async function handleSubmit(event) {
 
     try {
         if (state.mode === "execution") {
-            stopExecutionTimer();
+            stopExecutionTimer(); //Если тренировка была в режиме выполнения с таймером, таймер надо остановить перед сохранением
         }
-        await createWorkout(payload);
+        await createWorkout(payload); //отправляем данные на сервер через createWorkout()
         alert("Тренировка сохранена");
-        window.location.href = "/";
+        window.location.href = "/"; //после успешного сохранения возвращаемся на главную страницу
     } catch (error) {
         if (state.mode === "execution") {
             startExecutionTimer();

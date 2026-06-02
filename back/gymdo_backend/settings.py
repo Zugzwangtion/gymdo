@@ -8,10 +8,21 @@ load_dotenv(BASE_DIR / '.env')
 
 
 def split_env_list(name, default=''):
+    """Читает переменную окружения со списком через запятую.
+
+    Например, `DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1` превращается
+    в Python-список. Пустые элементы отбрасываются через `if value.strip()`.
+    """
     return [value.strip() for value in os.getenv(name, default).split(',') if value.strip()]
 
 
 def database_from_url(url):
+    """Преобразует DATABASE_URL в словарь настроек Django DATABASES.
+
+    На вход получает строку подключения. Для PostgreSQL разбирает имя базы,
+    пользователя, пароль, host, port и query-параметры. Для SQLite возвращает
+    путь к файлу базы. Если схема неизвестна, выбрасывает ValueError.
+    """
     parsed = urlparse(url)
 
     if parsed.scheme in ('postgres', 'postgresql'):

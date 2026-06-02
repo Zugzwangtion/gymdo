@@ -17,7 +17,10 @@
         </div>
     </nav>
 
-    <main class="workout-detail-page" data-workout-id="{{ workout_id }}">
+    <main class="workout-detail-page" data-workout-id="{{ workout_id }}"> // Атрибут data-workout-id используется для хранения идентификатора тренировки, который затем может быть использован в JavaScript для загрузки данных о конкретной тренировке с сервера.
+        #Django знает id из URL.
+        #JavaScript потом сможет прочитать его из HTML.
+        
         <header class="workout-detail-header">
             <a class="back-link" href="{% url 'pages:home' %}">← К календарю</a>
             <p class="workout-detail-kicker">Просмотр тренировки</p>

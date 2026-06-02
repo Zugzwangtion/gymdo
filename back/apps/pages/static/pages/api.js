@@ -77,7 +77,7 @@ async function apiFetch(path, options = {}) {
     const headers = await attachCsrfHeader(method, buildHeaders(options));
 
     const response = await fetch(`${API_BASE}${path}`, {
-        credentials: "include",
+        credentials: "include", // Важно: без этого куки сессии и CSRF не будут отправляться, и запросы на защищенные эндпоинты будут отклоняться.
         ...options,
         method,
         headers
@@ -97,7 +97,7 @@ async function getCurrentUser() {
     return data?.is_authenticated && data?.user ? data.user : null;
 }
 
-async function loginUser(username, password) {
+async function loginUser(username, password) { //после отправки пост мы переходим в бэкенд в accounts/views.py
     return apiFetch("/api/auth/login/", {
         method: "POST",
         body: JSON.stringify({ username, password })

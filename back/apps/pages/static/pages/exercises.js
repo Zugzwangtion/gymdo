@@ -1,3 +1,10 @@
+// exercisesDatabase - справочник упражнений на фронтенде.
+// Ключ объекта - русское название упражнения, например "Жим штанги лежа".
+// category - категория/группа мышц, в которой упражнение показывается в справочнике.
+// primaryMuscles - основные мышцы; здесь используются английские ключи для карты мышц.
+// secondaryMuscles - дополнительные мышцы, если нужно будет их учитывать.
+// image - путь к картинке упражнения.
+// description - русское описание упражнения.
 const exercisesDatabase = {
     "Жим штанги лежа": {
         category: "Грудь",
@@ -204,9 +211,10 @@ const exercisesDatabase = {
     },
 };
 
-function getExerciseByName(name) {
+function getExerciseByName(name) { 
     return exercisesDatabase[name] || null;
 }
+//Пример: getExerciseByName("Жим штанги лежа").primaryMuscles  вернет:  ["chest"]
 
 function getExercisesGroupedByCategory() {
     const grouped = {};
